@@ -53,21 +53,21 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#070B1A]/80 border-b border-white/[0.08] transition-all">
+    <nav className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#040B1A]/85 border-b border-white/[0.08] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo & Tên dự án */}
+          {/* Logo & Tên dự án - Tông xanh CTUET */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue via-brand-purple to-brand-cyan p-0.5 shadow-glow-blue transition-transform group-hover:scale-105">
-              <div className="w-full h-full bg-[#070B1A] rounded-[10px] flex items-center justify-center">
-                <Shield className="w-5 h-5 text-brand-cyan" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#003399] via-[#0066CC] to-[#38BDF8] p-0.5 shadow-glow-blue transition-transform group-hover:scale-105">
+              <div className="w-full h-full bg-[#040B1A] rounded-[10px] flex items-center justify-center">
+                <Shield className="w-5 h-5 text-[#38BDF8]" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-                Copyright<span className="text-brand-cyan">Chain</span>
+              <span className="font-extrabold text-xl tracking-tight text-white">
+                Copyright<span className="text-[#38BDF8]">Chain</span>
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold -mt-1">
+              <span className="text-[10px] uppercase tracking-widest text-[#93C5FD] font-semibold -mt-1">
                 Bảo quyền Blockchain
               </span>
             </div>
@@ -83,7 +83,7 @@ export default function Navbar() {
                   to={link.path}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     isActive
-                      ? "bg-gradient-to-r from-brand-blue/30 to-brand-purple/30 text-white border border-brand-blue/40 shadow-glow-blue"
+                      ? "bg-gradient-to-r from-[#003399]/60 to-[#0066CC]/40 text-white border border-[#0066CC]/50 shadow-glow-blue"
                       : "text-slate-300 hover:text-white hover:bg-white/[0.04]"
                   }`}
                 >
@@ -99,7 +99,7 @@ export default function Navbar() {
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="relative group overflow-hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-blue via-brand-purple to-brand-cyan text-white text-sm font-semibold shadow-glow-blue hover:shadow-glow-purple transition-all active:scale-95 disabled:opacity-50"
+                className="relative group overflow-hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] text-white text-sm font-semibold shadow-glow-blue hover:opacity-95 transition-all active:scale-95 disabled:opacity-50"
               >
                 <span className="relative flex items-center gap-2">
                   <Wallet className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function Navbar() {
 
                 {/* Dropdown thông tin ví */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 glass-card bg-[#0A1026]/95 border-white/10 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="absolute right-0 mt-2 w-64 glass-card bg-[#051126]/95 border-white/10 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
                     <div className="px-3 py-2 border-b border-white/5 mb-1">
                       <p className="text-[11px] text-slate-400 font-medium">Đã kết nối với Sepolia</p>
                       <p className="text-xs font-mono text-white truncate mt-0.5">{account}</p>
@@ -150,7 +150,7 @@ export default function Navbar() {
                       onClick={handleCopy}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/5 hover:text-white transition"
                     >
-                      <Copy className="w-3.5 h-3.5 text-brand-cyan" />
+                      <Copy className="w-3.5 h-3.5 text-[#38BDF8]" />
                       Sao chép địa chỉ ví
                     </button>
 
@@ -160,7 +160,7 @@ export default function Navbar() {
                       rel="noreferrer"
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/5 hover:text-white transition"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-brand-blue" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#0066CC]" />
                       Xem trên Sepolia Etherscan
                     </a>
 
@@ -206,7 +206,7 @@ export default function Navbar() {
                   to={link.path}
                   className={`px-4 py-2.5 rounded-xl text-sm font-medium ${
                     isActive
-                      ? "bg-brand-blue/20 text-brand-cyan border border-brand-blue/30"
+                      ? "bg-[#0066CC]/20 text-[#38BDF8] border border-[#0066CC]/40"
                       : "text-slate-300 hover:text-white hover:bg-white/5"
                   }`}
                 >
@@ -221,7 +221,7 @@ export default function Navbar() {
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-purple text-white text-sm font-semibold flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] text-white text-sm font-semibold flex items-center justify-center gap-2"
               >
                 <Wallet className="w-4 h-4" />
                 {isConnecting ? "Đang kết nối..." : "Kết nối MetaMask"}

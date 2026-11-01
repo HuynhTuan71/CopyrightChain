@@ -234,8 +234,8 @@ export default function Register() {
   if (!account) {
     return (
       <div className="max-w-xl mx-auto py-12">
-        <div className="glass-card bg-[#0A1026]/90 border-white/10 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-glass">
-          <div className="w-16 h-16 rounded-3xl bg-brand-blue/15 border border-brand-blue/30 text-brand-cyan mx-auto flex items-center justify-center shadow-glow-blue">
+        <div className="glass-card bg-[#051126]/90 border-white/10 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-glass">
+          <div className="w-16 h-16 rounded-3xl bg-[#003399]/20 border border-[#003399]/40 text-[#38BDF8] mx-auto flex items-center justify-center shadow-glow-blue">
             <Wallet className="w-8 h-8" />
           </div>
 
@@ -248,7 +248,7 @@ export default function Register() {
 
           <button
             onClick={connectWallet}
-            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-blue via-brand-purple to-brand-cyan hover:opacity-90 text-white font-semibold shadow-glow-blue flex items-center justify-center gap-2.5 mx-auto transition active:scale-95"
+            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-white font-semibold shadow-glow-blue flex items-center justify-center gap-2.5 mx-auto transition active:scale-95"
           >
             <Wallet className="w-4 h-4" />
             <span>Kết nối MetaMask ngay</span>
@@ -288,7 +288,7 @@ export default function Register() {
                 href={getEtherscanTxUrl(txHash)}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-brand-cyan hover:underline flex items-center gap-1"
+                className="font-mono text-[#38BDF8] hover:underline flex items-center gap-1"
               >
                 {formatAddress(txHash, 8, 6)}
                 <ExternalLink className="w-3 h-3" />
@@ -296,7 +296,7 @@ export default function Register() {
             </div>
             <div className="flex justify-between items-center text-slate-400">
               <span>Mã SHA-256:</span>
-              <span className="font-mono text-purple-300">{formatAddress(registeredData.fileHash, 10, 8)}</span>
+              <span className="font-mono text-[#60A5FA]">{formatAddress(registeredData.fileHash, 10, 8)}</span>
             </div>
             <div className="flex justify-between items-center text-slate-400">
               <span>Chủ sở hữu:</span>
@@ -331,7 +331,7 @@ export default function Register() {
           <div className="pt-2">
             <Link
               to="/my-works"
-              className="text-xs text-brand-cyan hover:underline inline-flex items-center gap-1"
+              className="text-xs text-[#38BDF8] hover:underline inline-flex items-center gap-1"
             >
               Xem danh sách tác phẩm của tôi <ArrowRight className="w-3 h-3" />
             </Link>
@@ -345,7 +345,7 @@ export default function Register() {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Tiêu đề trang */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-blue/10 border border-brand-blue/30 text-brand-cyan text-xs font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066CC]/15 border border-[#0066CC]/35 text-[#38BDF8] text-xs font-semibold">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Ghi nhận quyền tác giả On-Chain</span>
         </div>
@@ -357,7 +357,7 @@ export default function Register() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmitRegister} className="glass-card bg-[#0A1026]/90 rounded-3xl p-6 sm:p-8 border-white/10 space-y-6 shadow-glass">
+      <form onSubmit={handleSubmitRegister} className="glass-card bg-[#051126]/90 rounded-3xl p-6 sm:p-8 border-white/10 space-y-6 shadow-glass">
         {/* 1. KHU VỰC KÉO THẢ FILE */}
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-slate-200">
@@ -370,8 +370,8 @@ export default function Register() {
             onDrop={handleDrop}
             className={`relative border-2 border-dashed rounded-2xl p-7 text-center transition-all cursor-pointer ${
               isDragging
-                ? "border-brand-cyan bg-brand-cyan/10 scale-[1.01]"
-                : "border-white/15 hover:border-brand-blue/50 hover:bg-white/[0.02]"
+                ? "border-[#38BDF8] bg-[#38BDF8]/10 scale-[1.01]"
+                : "border-white/15 hover:border-[#0066CC]/50 hover:bg-white/[0.02]"
             }`}
             onClick={() => document.getElementById("register-file-input")?.click()}
           >
@@ -385,9 +385,9 @@ export default function Register() {
             />
 
             <div className="flex flex-col items-center justify-center space-y-2.5">
-              <div className="w-12 h-12 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 text-brand-cyan flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#003399]/20 border border-[#003399]/40 text-[#38BDF8] flex items-center justify-center shadow-glow-blue">
                 {isHashing ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-brand-cyan" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[#38BDF8]" />
                 ) : (
                   <UploadCloud className="w-6 h-6" />
                 )}
@@ -408,7 +408,7 @@ export default function Register() {
 
               {file && (
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 font-mono">
-                  <FileText className="w-3.5 h-3.5 text-brand-cyan" />
+                  <FileText className="w-3.5 h-3.5 text-[#38BDF8]" />
                   <span>{file.name}</span>
                   <span className="text-slate-500">({formatFileSize(file.size)})</span>
                 </div>
@@ -428,12 +428,12 @@ export default function Register() {
                   copyToClipboard(fileHash);
                   toast.success("Đã sao chép mã băm!");
                 }}
-                className="text-brand-cyan hover:underline flex items-center gap-1"
+                className="text-[#38BDF8] hover:underline flex items-center gap-1"
               >
                 <Copy className="w-3 h-3" /> Sao chép
               </button>
             </div>
-            <p className="font-mono text-xs text-brand-cyan break-all leading-relaxed">
+            <p className="font-mono text-xs text-[#38BDF8] break-all leading-relaxed">
               {fileHash}
             </p>
           </div>
@@ -507,11 +507,11 @@ export default function Register() {
               Tiến trình đăng ký Blockchain
             </p>
             <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium">
-              <div className={`p-2 rounded-xl flex items-center justify-center gap-1.5 ${txStep === 1 ? "bg-brand-blue/20 text-brand-cyan border border-brand-blue/30" : "text-slate-500"}`}>
+              <div className={`p-2 rounded-xl flex items-center justify-center gap-1.5 ${txStep === 1 ? "bg-[#003399]/30 text-[#38BDF8] border border-[#0066CC]/40" : "text-slate-500"}`}>
                 {txStep === 1 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-3.5 h-3.5 rounded-full border border-current inline-flex items-center justify-center text-[9px]">1</span>}
                 <span>Chờ ký ví</span>
               </div>
-              <div className={`p-2 rounded-xl flex items-center justify-center gap-1.5 ${txStep === 2 ? "bg-brand-purple/20 text-purple-300 border border-brand-purple/30" : "text-slate-500"}`}>
+              <div className={`p-2 rounded-xl flex items-center justify-center gap-1.5 ${txStep === 2 ? "bg-[#0066CC]/30 text-[#93C5FD] border border-[#0066CC]/40" : "text-slate-500"}`}>
                 {txStep === 2 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-3.5 h-3.5 rounded-full border border-current inline-flex items-center justify-center text-[9px]">2</span>}
                 <span>Đang xác nhận</span>
               </div>
@@ -527,7 +527,7 @@ export default function Register() {
         <button
           type="submit"
           disabled={!fileHash || !!duplicateWork || isHashing || txStep > 0}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-blue via-brand-purple to-brand-cyan hover:opacity-95 text-white font-bold text-base shadow-glow-blue hover:shadow-glow-purple flex items-center justify-center gap-2.5 transition active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-95 text-white font-bold text-base shadow-glow-blue flex items-center justify-center gap-2.5 transition active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {txStep > 0 ? (
             <>

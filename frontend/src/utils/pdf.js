@@ -4,8 +4,8 @@ import { formatTimestamp, formatAddress } from "./format";
 
 /**
  * Tạo và tải xuống Giấy chứng nhận đăng ký bản quyền dạng file PDF A4 ngang
- * Sử dụng Canvas độ phân giải cao (300 DPI) để vẽ layout bằng khen sang trọng,
- * hỗ trợ 100% hiển thị tiếng Việt có dấu hoàn hảo với font chữ hiện đại.
+ * Phong cách màu sắc: Tông Xanh Kỹ thuật - Công nghệ chuẩn Đại học Cần Thơ (CTUET)
+ * (#003399 - #0066CC - #38BDF8) kết hợp nền xanh đêm sang trọng.
  *
  * @param {Object} work Thông tin tác phẩm { fileHash, owner, title, description, timestamp }
  */
@@ -14,7 +14,7 @@ export async function generateCertificatePDF(work) {
     throw new Error("Không có dữ liệu tác phẩm để xuất giấy chứng nhận.");
   }
 
-  // 1. Tạo Canvas độ phân giải cao tương đương khổ A4 ngang 300 DPI (3508 x 2480 px)
+  // 1. Tạo Canvas độ phân giải cao tương đương khổ A4 ngang 300 DPI (2480 x 1754 px)
   const canvas = document.createElement("canvas");
   const width = 2480;
   const height = 1754;
@@ -27,33 +27,33 @@ export async function generateCertificatePDF(work) {
     await document.fonts.ready;
   }
 
-  // 2. Nền giấy chứng nhận: Màu nền tối sang trọng với hiệu ứng gradient
+  // 2. Nền giấy chứng nhận: Xanh đêm kỹ thuật công nghệ CTUET (#030A1C -> #061536 -> #020714)
   const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-  bgGrad.addColorStop(0, "#080E24");
-  bgGrad.addColorStop(0.5, "#0B1536");
-  bgGrad.addColorStop(1, "#050918");
+  bgGrad.addColorStop(0, "#030A1C");
+  bgGrad.addColorStop(0.5, "#061536");
+  bgGrad.addColorStop(1, "#020714");
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // 3. Viền trang trí đôi cao cấp phong cách hoàng gia/chứng chỉ quốc tế
-  // Viền ngoài (Outer Border)
+  // 3. Viền trang trí đôi cao cấp phong cách văn bằng chuẩn CTUET
+  // Viền ngoài: Xanh thương hiệu CTUET (#003399)
   ctx.lineWidth = 14;
-  ctx.strokeStyle = "#3B82F6";
+  ctx.strokeStyle = "#003399";
   ctx.strokeRect(60, 60, width - 120, height - 120);
 
-  // Viền trong mạ vàng (Inner Gold/Cyan Accent Border)
+  // Viền trong: Xanh dương công nghệ (#0066CC -> #38BDF8 -> #003399)
   ctx.lineWidth = 4;
   const borderGrad = ctx.createLinearGradient(0, 0, width, height);
-  borderGrad.addColorStop(0, "#22D3EE");
-  borderGrad.addColorStop(0.5, "#8B5CF6");
-  borderGrad.addColorStop(1, "#3B82F6");
+  borderGrad.addColorStop(0, "#38BDF8");
+  borderGrad.addColorStop(0.5, "#0066CC");
+  borderGrad.addColorStop(1, "#003399");
   ctx.strokeStyle = borderGrad;
   ctx.strokeRect(84, 84, width - 168, height - 168);
 
-  // Hoa văn 4 góc (Corner Ornaments)
+  // Hoa văn 4 góc (Corner Ornaments) - Xanh Cyan công nghệ
   const drawCorner = (x, y, dx, dy) => {
     ctx.lineWidth = 6;
-    ctx.strokeStyle = "#22D3EE";
+    ctx.strokeStyle = "#38BDF8";
     ctx.beginPath();
     ctx.moveTo(x, y + 40 * dy);
     ctx.lineTo(x, y);
@@ -75,11 +75,11 @@ export async function generateCertificatePDF(work) {
   ctx.fillStyle = "#64748B";
   ctx.fillText("NỀN TẢNG BLOCKCHAIN ETHEREUM SEPOLIA", width / 2, 215);
 
-  // Dải ruy băng tiêu đề chính
+  // Tiêu đề chính: Gradient Xanh CTUET (#38BDF8 -> #2979FF -> #60A5FA)
   const titleGrad = ctx.createLinearGradient(width / 2 - 400, 0, width / 2 + 400, 0);
-  titleGrad.addColorStop(0, "#60A5FA");
-  titleGrad.addColorStop(0.5, "#C084FC");
-  titleGrad.addColorStop(1, "#22D3EE");
+  titleGrad.addColorStop(0, "#38BDF8");
+  titleGrad.addColorStop(0.5, "#2979FF");
+  titleGrad.addColorStop(1, "#60A5FA");
 
   ctx.font = '800 64px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = titleGrad;
@@ -87,7 +87,7 @@ export async function generateCertificatePDF(work) {
 
   // Đường kẻ phân cách
   ctx.lineWidth = 3;
-  ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
+  ctx.strokeStyle = "rgba(0, 102, 204, 0.5)";
   ctx.beginPath();
   ctx.moveTo(width / 2 - 350, 345);
   ctx.lineTo(width / 2 + 350, 345);
@@ -113,10 +113,10 @@ export async function generateCertificatePDF(work) {
   const boxW = width - 400;
   const boxH = 650;
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+  ctx.fillStyle = "rgba(0, 51, 153, 0.08)";
   ctx.fillRect(boxX, boxY, boxW, boxH);
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+  ctx.strokeStyle = "rgba(0, 102, 204, 0.3)";
   ctx.strokeRect(boxX, boxY, boxW, boxH);
 
   ctx.textAlign = "left";
@@ -157,8 +157,7 @@ export async function generateCertificatePDF(work) {
   ctx.fillText("Mã băm bất biến SHA-256 (File Hash):", boxX + 60, boxY + 465);
 
   ctx.font = '500 28px "JetBrains Mono", monospace';
-  ctx.fillStyle = "#A78BFA";
-  // Tự động ngắt dòng cho mã hash bytes32 nếu cần
+  ctx.fillStyle = "#60A5FA";
   ctx.fillText(work.fileHash, boxX + 60, boxY + 520);
 
   ctx.font = 'italic 24px "Be Vietnam Pro", sans-serif';
@@ -175,7 +174,7 @@ export async function generateCertificatePDF(work) {
     width: 320,
     margin: 2,
     color: {
-      dark: "#080E24",
+      dark: "#002266",
       light: "#FFFFFF",
     },
   });
@@ -204,7 +203,7 @@ export async function generateCertificatePDF(work) {
 
   ctx.font = '400 22px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#64748B";
-  ctx.fillText("Mã hợp đồng: 0x5FbDB2315678afecb367f032d93F642f64180aa3", 200, height - 220);
+  ctx.fillText("Mã hợp đồng: 0x2b2b19769c2db4595191C2bDE4Ff756397956068", 200, height - 220);
   ctx.fillText("Bản quyền © CopyrightChain. Tất cả quyền sở hữu được bảo chứng bởi sổ cái phi tập trung.", 200, height - 180);
 
   // 8. Chuyển canvas thành file PDF A4 ngang và lưu về máy

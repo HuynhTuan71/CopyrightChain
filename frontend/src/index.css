@@ -4,19 +4,19 @@
 
 @layer base {
   body {
-    background-color: #070B1A;
+    background-color: #040B1A;
     color: #F8FAFC;
     overflow-x: hidden;
   }
 
-  /* Tùy chỉnh thanh cuộn đẹp mắt cho phong cách Fintech/Web3 */
+  /* Tùy chỉnh thanh cuộn đẹp mắt cho phong cách CTUET Blue */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #070B1A;
+    background: #040B1A;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -25,18 +25,18 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.5);
+    background: rgba(0, 102, 204, 0.7);
   }
 }
 
 @layer utilities {
-  /* Hiệu ứng thẻ kính (Glassmorphism) */
+  /* Hiệu ứng thẻ kính (Glassmorphism phong cách CTUET) */
   .glass-card {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
   }
 
   .glass-card-hover {
@@ -45,9 +45,9 @@
 
   .glass-card-hover:hover {
     background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(59, 130, 246, 0.35);
+    border-color: rgba(0, 102, 204, 0.45);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px -10px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 12px 40px -10px rgba(0, 102, 204, 0.35);
   }
 
   .glass-input {
@@ -60,8 +60,8 @@
   .glass-input:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.06);
-    border-color: #3B82F6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: #0066CC;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
   }
 
   /* Nền lưới chấm tinh tế */
@@ -72,8 +72,9 @@
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 
+  /* Gradient chữ CTUET Blue sang trọng */
   .text-gradient {
-    background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #22D3EE 100%);
+    background: linear-gradient(135deg, #38BDF8 0%, #2979FF 50%, #60A5FA 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

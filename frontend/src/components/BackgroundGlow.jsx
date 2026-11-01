@@ -6,14 +6,14 @@ export default function BackgroundGlow() {
       {/* Nền lưới vi mô (Subtle Dot/Grid Pattern) */}
       <div className="absolute inset-0 bg-grid-pattern opacity-60" />
 
-      {/* Quầng sáng Gradient Xanh Dương */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-brand-blue/20 rounded-full blur-[130px] animate-pulse" />
+      {/* Quầng sáng Xanh Dương CTUET (#003399) */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#003399]/25 rounded-full blur-[130px] animate-pulse" />
 
-      {/* Quầng sáng Gradient Tím */}
-      <div className="absolute top-1/4 -right-40 w-[30rem] h-[30rem] bg-brand-purple/15 rounded-full blur-[150px]" />
+      {/* Quầng sáng Xanh Công Nghệ (#0066CC) */}
+      <div className="absolute top-1/4 -right-40 w-[30rem] h-[30rem] bg-[#0066CC]/20 rounded-full blur-[150px]" />
 
-      {/* Quầng sáng Cyan trung tâm */}
-      <div className="absolute bottom-10 left-1/3 w-[26rem] h-[26rem] bg-brand-cyan/10 rounded-full blur-[140px]" />
+      {/* Quầng sáng Xanh Biển Nhạt (#38BDF8) */}
+      <div className="absolute bottom-10 left-1/3 w-[26rem] h-[26rem] bg-[#38BDF8]/12 rounded-full blur-[140px]" />
     </div>
   );
 }

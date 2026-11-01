@@ -82,7 +82,7 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-lg glass-card bg-[#0D1530]/90 border-white/10 rounded-2xl p-6 shadow-2xl"
+          className="relative w-full max-w-lg glass-card bg-[#051126]/95 border-white/10 rounded-2xl p-6 shadow-2xl"
         >
           {/* Nút đóng */}
           <button
@@ -93,9 +93,9 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
             <X className="w-5 h-5" />
           </button>
 
-          {/* Tiêu đề Modal */}
+          {/* Tiêu đề Modal - Xanh CTUET */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+            <div className="p-3 rounded-xl bg-[#003399]/20 border border-[#0066CC]/35 text-[#38BDF8]">
               <Send className="w-6 h-6" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-90 text-sm font-semibold text-white shadow-glow-blue flex items-center gap-2 transition"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-sm font-semibold text-white shadow-glow-blue flex items-center gap-2 transition"
                 >
                   Tiếp tục <ArrowRight className="w-4 h-4" />
                 </button>
@@ -164,7 +164,7 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
                 </div>
                 <div className="flex justify-between items-center text-slate-400">
                   <span>Chủ sở hữu mới:</span>
-                  <span className="font-mono text-brand-cyan font-bold">{newOwner}</span>
+                  <span className="font-mono text-[#38BDF8] font-bold">{newOwner}</span>
                 </div>
               </div>
 
@@ -181,7 +181,7 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
                   type="button"
                   disabled={isLoading}
                   onClick={handleExecuteTransfer}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-purple-600 hover:opacity-90 text-sm font-semibold text-white shadow-lg flex items-center gap-2 transition disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-[#003399] hover:opacity-90 text-sm font-semibold text-white shadow-lg flex items-center gap-2 transition disabled:opacity-50"
                 >
                   {isLoading ? (
                     <>

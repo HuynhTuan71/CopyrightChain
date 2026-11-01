@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <div className="space-y-24 md:space-y-32">
       {/* ================================================================= */}
-      {/* 1. HERO SECTION                                                   */}
+      {/* 1. HERO SECTION (TÔNG XANH CTUET)                                 */}
       {/* ================================================================= */}
       <section className="relative pt-6 md:pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -54,7 +54,7 @@ export default function Home() {
             className="lg:col-span-7 space-y-6"
           >
             {/* Tag nhỏ trên đầu */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-blue/10 border border-brand-blue/30 text-brand-cyan text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0066CC]/15 border border-[#0066CC]/35 text-[#38BDF8] text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Chuẩn băm mật mã SHA-256 & Smart Contract Ethereum</span>
             </div>
@@ -74,7 +74,7 @@ export default function Home() {
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <Link
                 to="/register"
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-blue via-brand-purple to-brand-cyan hover:opacity-95 text-white font-semibold shadow-glow-blue hover:shadow-glow-purple text-center flex items-center justify-center gap-2.5 transition active:scale-95"
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-95 text-white font-semibold shadow-glow-blue text-center flex items-center justify-center gap-2.5 transition active:scale-95"
               >
                 <Upload className="w-4 h-4" />
                 <span>Đăng ký bản quyền</span>
@@ -85,7 +85,7 @@ export default function Home() {
                 to="/verify"
                 className="px-6 py-3.5 rounded-xl glass-card hover:bg-white/[0.08] text-slate-200 hover:text-white font-semibold text-center flex items-center justify-center gap-2 border-white/10 transition"
               >
-                <Search className="w-4 h-4 text-brand-cyan" />
+                <Search className="w-4 h-4 text-[#38BDF8]" />
                 <span>Xác minh tác phẩm</span>
               </Link>
             </div>
@@ -97,7 +97,7 @@ export default function Home() {
                 <span>Bảo mật 100% Client-side</span>
               </div>
               <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-brand-cyan" />
+                <Database className="w-4 h-4 text-[#38BDF8]" />
                 <span>Không lưu file trên Server</span>
               </div>
             </div>
@@ -111,15 +111,15 @@ export default function Home() {
             className="lg:col-span-5 relative"
           >
             <div className="relative mx-auto max-w-md">
-              {/* Vầng hào quang phía sau card */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/30 via-brand-purple/20 to-brand-cyan/20 rounded-3xl blur-2xl transform -rotate-3 scale-105" />
+              {/* Vầng hào quang phía sau card - Xanh CTUET */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#003399]/40 via-[#0066CC]/30 to-[#38BDF8]/25 rounded-3xl blur-2xl transform -rotate-3 scale-105" />
 
               {/* Thẻ kính chính */}
-              <div className="relative glass-card bg-[#0D1530]/85 border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 overflow-hidden">
+              <div className="relative glass-card bg-[#07132C]/90 border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 overflow-hidden">
                 {/* Header card */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-brand-blue/20 border border-brand-blue/30 flex items-center justify-center text-brand-cyan">
+                    <div className="w-10 h-10 rounded-xl bg-[#0066CC]/20 border border-[#0066CC]/40 flex items-center justify-center text-[#38BDF8]">
                       <FileCheck2 className="w-5 h-5" />
                     </div>
                     <div>
@@ -137,9 +137,9 @@ export default function Home() {
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-400 font-medium">Mã băm SHA-256 (32 bytes):</span>
-                    <span className="text-[10px] text-brand-cyan font-mono">BẤT BIẾN</span>
+                    <span className="text-[10px] text-[#38BDF8] font-mono">BẤT BIẾN</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/10 font-mono text-xs text-brand-cyan break-all leading-relaxed shadow-inner">
+                  <div className="p-3 rounded-xl bg-black/40 border border-white/10 font-mono text-xs text-[#38BDF8] break-all leading-relaxed shadow-inner">
                     0x7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
                   </div>
                 </div>
@@ -148,25 +148,25 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                     <span className="text-slate-400 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-brand-blue" /> Thời gian block
+                      <Clock className="w-3.5 h-3.5 text-[#60A5FA]" /> Thời gian block
                     </span>
                     <span className="font-semibold text-slate-200">Vừa đăng ký</span>
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                     <span className="text-slate-400 flex items-center gap-1">
-                      <Layers className="w-3.5 h-3.5 text-brand-purple" /> Mạng thử nghiệm
+                      <Layers className="w-3.5 h-3.5 text-[#38BDF8]" /> Mạng thử nghiệm
                     </span>
                     <span className="font-semibold text-slate-200">Sepolia Testnet</span>
                   </div>
                 </div>
 
                 {/* Huy hiệu bảo chứng */}
-                <div className="p-3 rounded-xl bg-gradient-to-r from-brand-blue/10 to-brand-purple/10 border border-brand-blue/20 flex items-center justify-between text-xs">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-[#003399]/25 to-[#0066CC]/20 border border-[#0066CC]/30 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-brand-cyan" />
+                    <ShieldCheck className="w-4 h-4 text-[#38BDF8]" />
                     <span className="font-medium text-slate-200">Chứng nhận bản quyền số</span>
                   </div>
-                  <span className="text-brand-cyan font-bold">100% On-Chain</span>
+                  <span className="text-[#38BDF8] font-bold">100% On-Chain</span>
                 </div>
               </div>
             </div>
@@ -178,11 +178,11 @@ export default function Home() {
       {/* 2. THANH THỐNG KÊ (STATS BAR)                                     */}
       {/* ================================================================= */}
       <section>
-        <div className="glass-card bg-[#0A1026]/80 rounded-2xl p-6 sm:p-8 border-white/10 shadow-glass">
+        <div className="glass-card bg-[#051126]/90 rounded-2xl p-6 sm:p-8 border-white/10 shadow-glass">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
             {/* Stat 1: Tổng tác phẩm */}
             <div className="pt-4 md:pt-0">
-              <p className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-white to-brand-blue">
+              <p className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-white to-[#60A5FA]">
                 {isLoadingStats ? "..." : <StatCounter value={totalWorks} />}
               </p>
               <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Tác phẩm đã đăng ký</p>
@@ -198,7 +198,7 @@ export default function Home() {
 
             {/* Stat 3: Mạng Blockchain */}
             <div className="pt-4 md:pt-0">
-              <p className="text-3xl sm:text-4xl font-extrabold text-brand-purple">
+              <p className="text-3xl sm:text-4xl font-extrabold text-[#38BDF8]">
                 Sepolia
               </p>
               <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Ethereum PoS Testnet</p>
@@ -220,7 +220,7 @@ export default function Home() {
       {/* ================================================================= */}
       <section className="space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-cyan">Quy trình đơn giản & an toàn</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8]">Quy trình đơn giản & an toàn</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Hoạt động như thế nào?</h2>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
             Hệ thống kết hợp sức mạnh của Web Crypto API và Smart Contract để bảo vệ tài sản số chỉ trong 3 bước.
@@ -230,11 +230,11 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Bước 1 */}
           <div className="glass-card glass-card-hover rounded-2xl p-7 flex flex-col items-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-brand-blue/15 border border-brand-blue/30 text-brand-cyan flex items-center justify-center font-bold text-xl shadow-glow-blue">
+            <div className="w-14 h-14 rounded-2xl bg-[#003399]/20 border border-[#003399]/40 text-[#38BDF8] flex items-center justify-center font-bold text-xl shadow-glow-blue">
               <Upload className="w-6 h-6" />
             </div>
             <div className="space-y-2">
-              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-blue/20 text-brand-cyan">
+              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#003399]/30 text-[#93C5FD]">
                 Bước 1
               </div>
               <h3 className="text-lg font-bold text-white">Chọn file tác phẩm</h3>
@@ -246,11 +246,11 @@ export default function Home() {
 
           {/* Bước 2 */}
           <div className="glass-card glass-card-hover rounded-2xl p-7 flex flex-col items-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-brand-purple/15 border border-brand-purple/30 text-brand-purple flex items-center justify-center font-bold text-xl shadow-glow-purple">
+            <div className="w-14 h-14 rounded-2xl bg-[#0066CC]/20 border border-[#0066CC]/40 text-[#38BDF8] flex items-center justify-center font-bold text-xl shadow-glow-blue">
               <Cpu className="w-6 h-6" />
             </div>
             <div className="space-y-2">
-              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-purple/20 text-purple-300">
+              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#0066CC]/30 text-[#93C5FD]">
                 Bước 2
               </div>
               <h3 className="text-lg font-bold text-white">Băm SHA-256 trên trình duyệt</h3>
@@ -262,11 +262,11 @@ export default function Home() {
 
           {/* Bước 3 */}
           <div className="glass-card glass-card-hover rounded-2xl p-7 flex flex-col items-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-brand-cyan/15 border border-brand-cyan/30 text-brand-cyan flex items-center justify-center font-bold text-xl shadow-glow-cyan">
+            <div className="w-14 h-14 rounded-2xl bg-[#2979FF]/20 border border-[#2979FF]/40 text-[#38BDF8] flex items-center justify-center font-bold text-xl shadow-glow-blue">
               <Database className="w-6 h-6" />
             </div>
             <div className="space-y-2">
-              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-brand-cyan/20 text-brand-cyan">
+              <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#2979FF]/30 text-[#93C5FD]">
                 Bước 3
               </div>
               <h3 className="text-lg font-bold text-white">Ghi lên Blockchain Sepolia</h3>
@@ -283,7 +283,7 @@ export default function Home() {
       {/* ================================================================= */}
       <section className="space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-purple">Ưu điểm vượt trội</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8]">Ưu điểm vượt trội</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Vì sao bạn có thể hoàn toàn tin cậy?</h2>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
             Không lo rò rỉ ý tưởng, không sợ bị đánh cắp bản quyền và không phụ thuộc vào bất kỳ bên trung gian nào.
@@ -293,7 +293,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1 */}
           <div className="glass-card glass-card-hover p-6 sm:p-7 rounded-2xl flex gap-5 items-start">
-            <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-brand-blue flex-shrink-0">
+            <div className="p-3.5 rounded-xl bg-[#003399]/20 border border-[#003399]/40 text-[#38BDF8] flex-shrink-0">
               <Lock className="w-6 h-6" />
             </div>
             <div className="space-y-1.5">
@@ -306,7 +306,7 @@ export default function Home() {
 
           {/* Card 2 */}
           <div className="glass-card glass-card-hover p-6 sm:p-7 rounded-2xl flex gap-5 items-start">
-            <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-brand-purple flex-shrink-0">
+            <div className="p-3.5 rounded-xl bg-[#0066CC]/20 border border-[#0066CC]/40 text-[#60A5FA] flex-shrink-0">
               <Clock className="w-6 h-6" />
             </div>
             <div className="space-y-1.5">
@@ -319,7 +319,7 @@ export default function Home() {
 
           {/* Card 3 */}
           <div className="glass-card glass-card-hover p-6 sm:p-7 rounded-2xl flex gap-5 items-start">
-            <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-brand-cyan flex-shrink-0">
+            <div className="p-3.5 rounded-xl bg-[#2979FF]/20 border border-[#2979FF]/40 text-[#38BDF8] flex-shrink-0">
               <Search className="w-6 h-6" />
             </div>
             <div className="space-y-1.5">
@@ -346,9 +346,9 @@ export default function Home() {
       </section>
 
       {/* ================================================================= */}
-      {/* 5. CALL TO ACTION (CTA BANNER)                                    */}
+      {/* 5. CALL TO ACTION (CTA BANNER TÔNG XANH CTUET)                    */}
       {/* ================================================================= */}
-      <section className="relative overflow-hidden rounded-3xl glass-card bg-gradient-to-r from-brand-blue/20 via-brand-purple/20 to-brand-cyan/20 border-white/15 p-8 sm:p-12 text-center space-y-6">
+      <section className="relative overflow-hidden rounded-3xl glass-card bg-gradient-to-r from-[#003399]/30 via-[#0066CC]/25 to-[#38BDF8]/20 border-white/15 p-8 sm:p-12 text-center space-y-6">
         <h2 className="text-2xl sm:text-4xl font-extrabold text-white">
           Sẵn sàng bảo vệ tác phẩm số đầu tiên của bạn?
         </h2>
@@ -358,7 +358,7 @@ export default function Home() {
         <div className="pt-2 flex justify-center">
           <Link
             to="/register"
-            className="px-8 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-[#070B1A] font-bold shadow-xl transition active:scale-95 flex items-center gap-2"
+            className="px-8 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-[#002266] font-bold shadow-xl transition active:scale-95 flex items-center gap-2"
           >
             Bắt đầu đăng ký ngay
             <ArrowRight className="w-4 h-4" />

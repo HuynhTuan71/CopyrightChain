@@ -252,7 +252,7 @@ export default function Verify() {
           <button
             type="submit"
             disabled={isSearching || isHashing}
-            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-90 text-white text-sm font-semibold shadow-glow-blue flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-95"
+            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-white text-sm font-semibold shadow-glow-blue flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-95"
           >
             {isSearching ? (
               <>
@@ -371,7 +371,7 @@ export default function Verify() {
                     <Copy className="w-3 h-3" /> Sao chép
                   </button>
                 </div>
-                <p className="font-mono text-xs text-purple-300 break-all bg-black/40 p-2.5 rounded-xl border border-white/5">
+                <p className="font-mono text-xs text-[#38BDF8] break-all bg-black/40 p-2.5 rounded-xl border border-white/5">
                   {verifiedWork.fileHash}
                 </p>
               </div>
