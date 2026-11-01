@@ -1,0 +1,27 @@
+{
+  "name": "copyright-chain",
+  "version": "1.0.0",
+  "description": "DApp đăng ký và xác thực bản quyền tác phẩm số bằng Blockchain",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:local": "hardhat run scripts/deploy.js",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "sepolia",
+    "smart-contract",
+    "copyright",
+    "hardhat"
+  ],
+  "author": "CopyrightChain Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.18"
+  }
+}

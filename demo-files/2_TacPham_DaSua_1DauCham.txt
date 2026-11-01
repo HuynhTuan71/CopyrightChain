@@ -1,0 +1,8 @@
+BẢN QUYỀN TÁC PHẨM VĂN HỌC SỐ
+Tác phẩm: "Hành Trình Khám Phá Công Nghệ Blockchain"
+Tác giả: Sinh viên Đồ Án Tốt Nghiệp CopyrightChain
+Thời gian sáng tác: 2026
+
+Nội dung:
+Blockchain không chỉ là công nghệ lưu trữ dữ liệu phân tán, mà còn là nền tảng kiến tạo niềm tin số. Nhờ vào hàm băm mật mã học SHA-256 và Smart Contract trên Ethereum Sepolia, quyền sở hữu tác phẩm của mỗi cá nhân được bảo vệ vĩnh viễn và không thể làm giả.
+.

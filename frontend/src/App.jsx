@@ -1,0 +1,59 @@
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import BackgroundGlow from "./components/BackgroundGlow";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Verify from "./pages/Verify";
+import MyWorks from "./pages/MyWorks";
+import NotFound from "./pages/NotFound";
+
+export default function App() {
+  return (
+    <div className="relative min-h-screen flex flex-col bg-background text-slate-100 font-sans selection:bg-brand-blue selection:text-white">
+      {/* Nền hiệu ứng quầng sáng và lưới vi mô */}
+      <BackgroundGlow />
+
+      {/* Thanh điều hướng chính */}
+      <Navbar />
+
+      {/* Vùng nội dung trang */}
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 flex-grow w-full">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/verify/:hash" element={<Verify />} />
+          <Route path="/my-works" element={<MyWorks />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+
+      {/* Chân trang */}
+      <Footer />
+
+      {/* Thông báo dạng Toast với phong cách Dark Glassmorphism */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: "!bg-[#0B1229]/95 !text-slate-100 !border !border-white/10 !backdrop-blur-xl !shadow-2xl !text-sm !rounded-2xl !px-4 !py-3 font-sans",
+          duration: 4000,
+          success: {
+            iconTheme: {
+              primary: "#10B981",
+              secondary: "#FFFFFF",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#F43F5E",
+              secondary: "#FFFFFF",
+            },
+          },
+        }}
+      />
+    </div>
+  );
+}
