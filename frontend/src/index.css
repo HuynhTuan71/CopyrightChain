@@ -32,7 +32,7 @@
 @layer utilities {
   /* Hiệu ứng thẻ kính (Glassmorphism phong cách CTUET) */
   .glass-card {
-    background: rgba(255, 255, 255, 0.04);
+    background-color: rgba(5, 17, 38, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -44,7 +44,7 @@
   }
 
   .glass-card-hover:hover {
-    background: rgba(255, 255, 255, 0.07);
+    background-color: rgba(7, 24, 53, 0.95);
     border-color: rgba(0, 102, 204, 0.45);
     transform: translateY(-2px);
     box-shadow: 0 12px 40px -10px rgba(0, 102, 204, 0.35);

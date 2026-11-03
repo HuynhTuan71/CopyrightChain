@@ -53,7 +53,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#040B1A]/85 border-b border-white/[0.08] transition-all">
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#040B1A]/95 border-b border-white/[0.08] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo & Tên dự án - Tông xanh CTUET */}
@@ -68,7 +68,7 @@ export default function Navbar() {
                 Copyright<span className="text-[#38BDF8]">Chain</span>
               </span>
               <span className="text-[10px] uppercase tracking-widest text-[#93C5FD] font-semibold -mt-1">
-                Bảo quyền Blockchain
+                Bản quyền Blockchain
               </span>
             </div>
           </Link>
@@ -138,17 +138,23 @@ export default function Navbar() {
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
                 </button>
 
-                {/* Dropdown thông tin ví */}
+                {/* Dropdown thông tin ví - Nền tối đặc không bị nhìn xuyên */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 glass-card bg-[#051126]/95 border-white/10 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
-                    <div className="px-3 py-2 border-b border-white/5 mb-1">
-                      <p className="text-[11px] text-slate-400 font-medium">Đã kết nối với Sepolia</p>
-                      <p className="text-xs font-mono text-white truncate mt-0.5">{account}</p>
+                  <div className="absolute right-0 mt-2 w-72 bg-[#061129] border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-2.5 z-50 animate-in fade-in slide-in-from-top-2">
+                    <div className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/5 mb-1.5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] text-slate-400 font-medium">Đã kết nối Sepolia</p>
+                        <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                          Online
+                        </span>
+                      </div>
+                      <p className="text-xs font-mono text-white truncate mt-1 select-all" title={account}>{account}</p>
                     </div>
 
                     <button
                       onClick={handleCopy}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/5 hover:text-white transition"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition"
                     >
                       <Copy className="w-3.5 h-3.5 text-[#38BDF8]" />
                       Sao chép địa chỉ ví
@@ -158,20 +164,20 @@ export default function Navbar() {
                       href={getEtherscanAddressUrl(account)}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-white/5 hover:text-white transition"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-200 hover:bg-white/10 hover:text-white transition"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-[#0066CC]" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#38BDF8]" />
                       Xem trên Sepolia Etherscan
                     </a>
 
-                    <div className="h-px bg-white/5 my-1" />
+                    <div className="h-px bg-white/10 my-1.5" />
 
                     <button
                       onClick={() => {
                         disconnectWallet();
                         setDropdownOpen(false);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/15 transition"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Ngắt kết nối
@@ -186,7 +192,7 @@ export default function Navbar() {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg glass-card text-slate-300 hover:text-white transition"
+              className="p-2 rounded-lg bg-white/5 text-slate-300 hover:text-white transition"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -196,7 +202,7 @@ export default function Navbar() {
 
       {/* Menu thả xuống trên Mobile */}
       {mobileMenuOpen && (
-        <div className="md:hidden glass-card border-t border-white/[0.08] px-4 pt-3 pb-6 space-y-3">
+        <div className="md:hidden bg-[#040B1A] border-t border-white/[0.08] px-4 pt-3 pb-6 space-y-3">
           <div className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
