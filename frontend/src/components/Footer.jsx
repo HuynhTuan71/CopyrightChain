@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, ExternalLink, Github, Heart } from "lucide-react";
+import { Shield, ExternalLink } from "lucide-react";
 import { CONTRACT_ADDRESS } from "../utils/contract";
 import { formatAddress, getEtherscanAddressUrl } from "../utils/format";
 
@@ -69,13 +69,11 @@ export default function Footer() {
         {/* Chân trang đáy */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>
-            © {new Date().getFullYear()} CopyrightChain - Đồ án tốt nghiệp môn Công nghệ Blockchain.
+            © {new Date().getFullYear()} CopyrightChain. Tất cả các quyền được bảo lưu.
           </p>
-          <div className="flex items-center gap-1 text-slate-400">
-            <span>Xây dựng bằng</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>trên Solidity & React + Vite</span>
-          </div>
+          <p className="text-slate-500">
+            Hệ thống xác thực và đăng ký bản quyền số trên nền tảng Blockchain.
+          </p>
         </div>
       </div>
     </footer>
