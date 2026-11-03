@@ -1,6 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Wallet, Copy, ExternalLink, LogOut, ChevronDown, Menu, X, AlertCircle, Sun, Moon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Shield,
+  Wallet,
+  Copy,
+  ExternalLink,
+  LogOut,
+  ChevronDown,
+  Menu,
+  X,
+  AlertCircle,
+  Sun,
+  Moon,
+  Home,
+  PlusCircle,
+  Search,
+  FolderOpen,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useWallet } from "../context/WalletContext";
 import { useTheme } from "../context/ThemeContext";
@@ -39,11 +56,23 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Khóa cuộn màn hình nền khi đang mở Sidebar Mobile
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
+
   const navLinks = [
-    { name: "Trang chủ", path: "/" },
-    { name: "Đăng ký", path: "/register" },
-    { name: "Xác minh", path: "/verify" },
-    { name: "Tác phẩm của tôi", path: "/my-works" },
+    { name: "Trang chủ", path: "/", icon: Home },
+    { name: "Đăng ký", path: "/register", icon: PlusCircle },
+    { name: "Xác minh", path: "/verify", icon: Search },
+    { name: "Tác phẩm của tôi", path: "/my-works", icon: FolderOpen },
   ];
 
   const handleCopy = async () => {
@@ -213,96 +242,198 @@ export default function Navbar() {
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(true)}
               className="p-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 active:scale-95 transition"
-              aria-label="Menu"
+              aria-label="Mở Sidebar menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menu thả xuống trên Mobile */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-[#040B1A] border-t border-slate-200 dark:border-white/[0.08] px-4 pt-3 pb-6 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
-          {/* Danh sách liên kết điều hướng */}
-          <div className="flex flex-col space-y-1">
-            {navLinks.map((link) => {
-              const isActive = location.pathname === link.path;
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                    isActive
-                      ? "bg-[#0052CC]/10 text-[#0052CC] dark:bg-[#0066CC]/20 dark:text-[#38BDF8] font-bold"
-                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
-          </div>
+      {/* Sidebar Drawer xuất hiện từ bên phải trên Mobile */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-[100] md:hidden">
+            {/* Lớp nền mờ (Backdrop Overlay) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+              aria-hidden="true"
+            />
 
-          {/* Vùng ví trên Mobile */}
-          <div className="pt-2 border-t border-slate-200 dark:border-white/10">
-            {!account ? (
-              <button
-                onClick={connectWallet}
-                disabled={isConnecting}
-                className="w-full py-3 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2 shadow-sm"
-              >
-                <Wallet className="w-4 h-4" />
-                {isConnecting ? "Đang kết nối..." : "Kết nối MetaMask"}
-              </button>
-            ) : !isCorrectNetwork ? (
-              <button
-                onClick={switchToSepolia}
-                className="w-full py-3 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 text-sm font-medium border border-amber-500/30 flex items-center justify-center gap-2"
-              >
-                <AlertCircle className="w-4 h-4" />
-                Chuyển sang mạng Sepolia
-              </button>
-            ) : (
-              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400">Số dư ví:</span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{parseFloat(balance).toFixed(3)} SEP</span>
-                </div>
-                <div className="text-xs font-mono text-slate-800 dark:text-slate-200 truncate py-1">
-                  {account}
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+            {/* Khung Sidebar trượt từ bên phải qua (Slide-in from Right) */}
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="fixed inset-y-0 right-0 w-[85%] max-w-xs sm:max-w-sm bg-white dark:bg-[#071329] border-l border-slate-200 dark:border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto p-5 z-[101]"
+            >
+              {/* PHẦN TRÊN: Header & Danh sách điều hướng */}
+              <div className="space-y-6">
+                {/* Header thanh Sidebar */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#0052CC] flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                      <Shield className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white leading-none">
+                        Copyright<span className="text-[#0066CC] dark:text-[#38BDF8]">Chain</span>
+                      </span>
+                      <span className="text-[9px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">
+                        Bản quyền Blockchain
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Nút đóng Sidebar */}
                   <button
-                    onClick={handleCopy}
-                    className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 active:scale-95 transition"
+                    aria-label="Đóng thanh Sidebar"
                   >
-                    <Copy className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
-                    <span>Sao chép</span>
+                    <X className="w-5 h-5" />
                   </button>
-                  <a
-                    href={getEtherscanAddressUrl(account)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
-                    <span>Etherscan</span>
-                  </a>
                 </div>
-                <button
-                  onClick={disconnectWallet}
-                  className="w-full mt-1 py-2 text-xs text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/20 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 font-medium"
-                >
-                  Ngắt kết nối ví
-                </button>
+
+                {/* Danh sách các trang điều hướng */}
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 pb-1">
+                    Trang chức năng
+                  </p>
+                  {navLinks.map((link) => {
+                    const isActive = location.pathname === link.path;
+                    const IconComponent = link.icon;
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition ${
+                          isActive
+                            ? "bg-[#0052CC] text-white shadow-md shadow-[#0052CC]/25"
+                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        {IconComponent && (
+                          <IconComponent
+                            className={`w-4 h-4 ${
+                              isActive ? "text-white" : "text-[#0066CC] dark:text-[#38BDF8]"
+                            }`}
+                          />
+                        )}
+                        <span>{link.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+
+              {/* PHẦN DƯỚI: Quản lý ví & Tùy chọn giao diện */}
+              <div className="pt-6 space-y-4 border-t border-slate-200 dark:border-white/10">
+                {!account ? (
+                  <button
+                    onClick={() => {
+                      connectWallet();
+                      setMobileMenuOpen(false);
+                    }}
+                    disabled={isConnecting}
+                    className="w-full py-3.5 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition"
+                  >
+                    <Wallet className="w-4 h-4" />
+                    <span>{isConnecting ? "Đang kết nối..." : "Kết nối MetaMask"}</span>
+                  </button>
+                ) : !isCorrectNetwork ? (
+                  <button
+                    onClick={() => {
+                      switchToSepolia();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-3.5 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 text-sm font-semibold border border-amber-500/30 flex items-center justify-center gap-2 active:scale-95 transition"
+                  >
+                    <AlertCircle className="w-4 h-4 animate-bounce text-amber-500" />
+                    <span>Chuyển sang mạng Sepolia</span>
+                  </button>
+                ) : (
+                  <div className="space-y-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Sepolia Online
+                      </span>
+                      <span className="font-mono text-slate-800 dark:text-white font-bold">
+                        {parseFloat(balance).toFixed(3)} SEP
+                      </span>
+                    </div>
+
+                    <div className="text-xs font-mono text-slate-600 dark:text-slate-300 truncate bg-white dark:bg-black/30 p-2 rounded-lg border border-slate-200 dark:border-white/5">
+                      {account}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <button
+                        onClick={handleCopy}
+                        className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 transition active:scale-95"
+                      >
+                        <Copy className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                        <span>Sao chép</span>
+                      </button>
+                      <a
+                        href={getEtherscanAddressUrl(account)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 transition active:scale-95"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                        <span>Etherscan</span>
+                      </a>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        disconnectWallet();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full py-2 text-xs text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/20 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 font-medium transition active:scale-95 flex items-center justify-center gap-1.5"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Ngắt kết nối ví</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Chuyển đổi giao diện Sáng / Tối */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 text-xs">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Giao diện</span>
+                  <button
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-800 dark:text-slate-200 font-semibold shadow-sm hover:bg-slate-50 dark:hover:bg-white/10 transition active:scale-95"
+                  >
+                    {isDark ? (
+                      <>
+                        <Sun className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Chế độ Tối</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-3.5 h-3.5 text-slate-700" />
+                        <span>Chế độ Sáng</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.aside>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
