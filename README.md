@@ -13,7 +13,7 @@
 6. [Hướng dẫn cài đặt & Cấu hình .env](#-6-hướng-dẫn-cài-đặt--cấu-hình-env)
 7. [Chạy kiểm thử & Triển khai Smart Contract](#-7-chạy-kiểm-thử--triển-khai-smart-contract)
 8. [Khởi chạy Giao diện Frontend](#-8-khởi-chạy-giao-diện-frontend)
-9. [Kịch bản Demo báo cáo đồ án](#-9-kịch-bản-demo-báo-cáo-đồ-án)
+9. [Kịch bản Demo báo cáo](#-9-kịch-bản-demo-báo-cáo)
 10. [Hạn chế & Hướng phát triển](#-10-hạn-chế--hướng-phát-triển)
 
 ---
