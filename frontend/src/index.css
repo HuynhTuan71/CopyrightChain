@@ -2,80 +2,135 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Chế độ Sáng (Light Mode) - Tinh tế, chuẩn doanh nghiệp */
+  --bg-primary: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+}
+
+.dark {
+  /* Chế độ Tối (Dark Mode) - Tông xanh đậm CTUET Navy chuyên nghiệp */
+  --bg-primary: #040B1A;
+  --bg-surface: #071329;
+  --bg-surface-hover: #0D2044;
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
 @layer base {
   body {
-    background-color: #040B1A;
-    color: #F8FAFC;
+    background-color: var(--bg-primary);
+    color: var(--text-main);
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
-  /* Tùy chỉnh thanh cuộn đẹp mắt cho phong cách CTUET Blue */
+  /* Tùy chỉnh thanh cuộn đẹp mắt */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #040B1A;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(148, 163, 184, 0.3);
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 102, 204, 0.7);
+    background: rgba(0, 102, 204, 0.6);
   }
 }
 
 @layer utilities {
-  /* Hiệu ứng thẻ kính (Glassmorphism phong cách CTUET) */
+  /* Thẻ nội dung (Cards) - Tương thích mượt mà cả Sáng và Tối */
   .glass-card {
-    background-color: rgba(5, 17, 38, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    background-color: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--card-shadow);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .glass-card-hover {
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card-hover:hover {
-    background-color: rgba(7, 24, 53, 0.95);
-    border-color: rgba(0, 102, 204, 0.45);
+    background-color: var(--bg-surface-hover);
+    border-color: rgba(0, 102, 204, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px -10px rgba(0, 102, 204, 0.35);
+    box-shadow: 0 10px 30px -5px rgba(0, 102, 204, 0.18);
   }
 
+  /* Ô nhập liệu Form (Input, Textarea) */
   .glass-input {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text-main);
     transition: all 0.2s ease;
   }
 
   .glass-input:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.06);
     border-color: #0066CC;
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
   }
 
-  /* Nền lưới chấm tinh tế */
+  /* Nền lưới kỹ thuật tinh gọn, không gây chói mắt */
   .bg-grid-pattern {
     background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  }
+
+  .dark .bg-grid-pattern {
     background-image: 
       linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 
-  /* Gradient chữ CTUET Blue sang trọng */
+  /* Chữ điểm nhấn thanh lịch, không quá nhiều màu */
   .text-gradient {
-    background: linear-gradient(135deg, #38BDF8 0%, #2979FF 50%, #60A5FA 100%);
+    color: #0052CC;
+  }
+
+  .dark .text-gradient {
+    background: linear-gradient(135deg, #38BDF8 0%, #60A5FA 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Nút bấm thương hiệu cao cấp - Màu xanh CTUET đồng nhất, không bị màu mè */
+  .btn-primary {
+    background: #0052CC;
+    color: #FFFFFF;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 10px -2px rgba(0, 82, 204, 0.4);
+  }
+  .btn-primary:hover {
+    background: #0042A6;
+    opacity: 0.95;
+  }
+  .dark .btn-primary {
+    background: #0066CC;
+    box-shadow: 0 2px 12px -2px rgba(0, 102, 204, 0.5);
+  }
+  .dark .btn-primary:hover {
+    background: #0052CC;
   }
 }

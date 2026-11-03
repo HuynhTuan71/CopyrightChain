@@ -7,7 +7,6 @@ import {
   Download,
   Send,
   Copy,
-  ExternalLink,
   Plus,
   Wallet,
   Clock,
@@ -18,7 +17,7 @@ import {
 import toast from "react-hot-toast";
 import { useWallet } from "../context/WalletContext";
 import { fetchWorksByOwner } from "../utils/contract";
-import { formatAddress, formatHash, formatTimestamp, copyToClipboard } from "../utils/format";
+import { formatHash, formatTimestamp, copyToClipboard } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
 import TransferModal from "../components/TransferModal";
 import { CardSkeleton } from "../components/LoadingSkeleton";
@@ -90,21 +89,21 @@ export default function MyWorks() {
   if (!account) {
     return (
       <div className="max-w-xl mx-auto py-12">
-        <div className="glass-card bg-[#051126]/90 border-white/10 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-glass">
-          <div className="w-16 h-16 rounded-3xl bg-[#003399]/20 border border-[#003399]/40 text-[#38BDF8] mx-auto flex items-center justify-center shadow-glow-blue">
+        <div className="glass-card rounded-3xl p-8 sm:p-10 text-center space-y-6">
+          <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-[#003399]/20 border border-blue-200 dark:border-[#003399]/40 text-[#0052CC] dark:text-[#38BDF8] mx-auto flex items-center justify-center">
             <Wallet className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Xem tác phẩm của bạn</h2>
-            <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Xem tác phẩm của bạn</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-md mx-auto">
               Vui lòng kết nối ví MetaMask để xem danh mục tất cả tác phẩm số đã được xác thực quyền sở hữu của bạn.
             </p>
           </div>
 
           <button
             onClick={connectWallet}
-            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-white font-semibold shadow-glow-blue flex items-center justify-center gap-2.5 mx-auto transition active:scale-95"
+            className="px-6 py-3.5 rounded-xl btn-primary font-semibold flex items-center justify-center gap-2.5 mx-auto transition active:scale-95 shadow-sm"
           >
             <Wallet className="w-4 h-4" />
             <span>Kết nối MetaMask ngay</span>
@@ -116,15 +115,15 @@ export default function MyWorks() {
 
   return (
     <div className="space-y-8">
-      {/* HEADER & TÌM KIẾM - TÔNG XANH CTUET */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-6">
+      {/* HEADER & TÌM KIẾM */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 dark:border-white/10 pb-6">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066CC]/15 border border-[#0066CC]/35 text-[#93C5FD] text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#93C5FD] text-xs font-semibold">
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Bộ sưu tập cá nhân ({works.length} tác phẩm)</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Tác Phẩm Của Tôi</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Tác Phẩm Của Tôi</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Quản lý quyền sở hữu, xuất giấy chứng nhận PDF và thực hiện chuyển nhượng bản quyền.
           </p>
         </div>
@@ -138,7 +137,7 @@ export default function MyWorks() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm theo tên tác phẩm..."
-              className="w-full glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm text-white placeholder:text-slate-500"
+              className="w-full glass-input pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm placeholder:text-slate-400"
             />
           </div>
 
@@ -146,7 +145,7 @@ export default function MyWorks() {
           <button
             onClick={loadWorks}
             disabled={isLoading}
-            className="p-2.5 rounded-xl glass-card hover:bg-white/10 text-slate-300 hover:text-white transition disabled:opacity-50"
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition disabled:opacity-50"
             title="Làm mới dữ liệu từ Blockchain"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -155,7 +154,7 @@ export default function MyWorks() {
           {/* Nút đăng ký mới */}
           <Link
             to="/register"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-glow-blue transition active:scale-95 flex-shrink-0"
+            className="px-4 py-2.5 rounded-xl btn-primary text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition active:scale-95 flex-shrink-0 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Đăng ký mới</span>
@@ -172,16 +171,16 @@ export default function MyWorks() {
         </div>
       ) : filteredWorks.length === 0 ? (
         /* Empty State */
-        <div className="glass-card bg-[#051126]/60 border-white/10 rounded-3xl p-12 text-center space-y-5 max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 text-slate-400 mx-auto flex items-center justify-center">
+        <div className="glass-card rounded-3xl p-12 text-center space-y-5 max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 mx-auto flex items-center justify-center">
             <FolderOpen className="w-8 h-8" />
           </div>
 
           <div className="space-y-1.5">
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {searchTerm ? "Không tìm thấy tác phẩm phù hợp" : "Chưa có tác phẩm nào"}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
               {searchTerm
                 ? `Không có tác phẩm nào khớp với từ khoá "${searchTerm}". Hãy thử từ khoá khác.`
                 : "Địa chỉ ví của bạn hiện chưa sở hữu bất kỳ chứng nhận bản quyền nào trên CopyrightChain."}
@@ -191,7 +190,7 @@ export default function MyWorks() {
           {!searchTerm && (
             <Link
               to="/register"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] text-white text-sm font-semibold shadow-glow-blue hover:opacity-90 transition active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl btn-primary text-sm font-semibold transition active:scale-95 shadow-sm"
             >
               <Plus className="w-4 h-4" />
               <span>Đăng ký tác phẩm đầu tiên</span>
@@ -199,7 +198,7 @@ export default function MyWorks() {
           )}
         </div>
       ) : (
-        /* Lưới các thẻ tác phẩm (Grid of Works) */
+        /* Lưới các thẻ tác phẩm */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredWorks.map((work) => (
             <motion.div
@@ -207,69 +206,69 @@ export default function MyWorks() {
               layout
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass-card glass-card-hover bg-[#051126]/85 border-white/10 rounded-3xl p-6 flex flex-col justify-between space-y-5 relative overflow-hidden"
+              className="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between space-y-5 relative overflow-hidden"
             >
               <div className="space-y-3">
                 {/* Header card: Icon + Ngày */}
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <div className="flex items-center gap-1.5 text-[#38BDF8] font-mono">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[#0066CC] dark:text-[#38BDF8] font-mono font-medium">
                     <FileCheck2 className="w-4 h-4" />
                     <span>On-Chain</span>
                   </div>
                   <div className="flex items-center gap-1 text-[11px]">
-                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
                     <span>{formatTimestamp(work.timestamp)}</span>
                   </div>
                 </div>
 
                 {/* Tên tác phẩm */}
-                <h3 className="text-lg font-bold text-white line-clamp-2 leading-snug">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">
                   {work.title}
                 </h3>
 
                 {/* Mô tả ngắn */}
                 {work.description && (
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                     {work.description}
                   </p>
                 )}
 
                 {/* Mã Hash */}
-                <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                  <div className="flex justify-between items-center text-[10px] text-slate-500">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/5 space-y-1">
+                  <div className="flex justify-between items-center text-[10px] text-slate-400">
                     <span>MÃ BĂM SHA-256</span>
                     <button
                       onClick={() => handleCopy(work.fileHash, "mã băm")}
-                      className="text-[#38BDF8] hover:underline flex items-center gap-0.5"
+                      className="text-[#0066CC] dark:text-[#38BDF8] hover:underline flex items-center gap-0.5 font-medium"
                     >
                       <Copy className="w-2.5 h-2.5" /> Chép
                     </button>
                   </div>
-                  <p className="font-mono text-xs text-[#38BDF8] truncate">
+                  <p className="font-mono text-xs text-[#0066CC] dark:text-[#38BDF8] truncate font-medium">
                     {formatHash(work.fileHash, 14, 10)}
                   </p>
                 </div>
               </div>
 
               {/* Hàng nút thao tác: PDF & Chuyển quyền */}
-              <div className="pt-3 border-t border-white/5 grid grid-cols-2 gap-2 text-xs">
+              <div className="pt-3 border-t border-slate-200 dark:border-white/5 grid grid-cols-2 gap-2 text-xs">
                 <button
                   onClick={() => handleDownloadPDF(work)}
                   disabled={downloadingHash === work.fileHash}
-                  className="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white font-medium flex items-center justify-center gap-1.5 transition border border-white/5 active:scale-95 disabled:opacity-50"
+                  className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-medium flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"
                   title="Xuất file PDF Giấy chứng nhận"
                 >
                   {downloadingHash === work.fileHash ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <Download className="w-3.5 h-3.5 text-[#38BDF8]" />
+                    <Download className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
                   )}
                   <span>Chứng nhận</span>
                 </button>
 
                 <button
                   onClick={() => handleOpenTransfer(work)}
-                  className="px-3 py-2.5 rounded-xl bg-[#0066CC]/20 hover:bg-[#0066CC]/30 text-[#93C5FD] font-medium flex items-center justify-center gap-1.5 transition border border-[#0066CC]/35 active:scale-95"
+                  className="px-3 py-2.5 rounded-xl bg-blue-50 dark:bg-[#0066CC]/20 hover:bg-blue-100 dark:hover:bg-[#0066CC]/30 text-[#0052CC] dark:text-[#93C5FD] font-medium flex items-center justify-center gap-1.5 transition border border-blue-200 dark:border-[#0066CC]/35 active:scale-95"
                   title="Chuyển nhượng quyền sở hữu sang ví khác"
                 >
                   <Send className="w-3.5 h-3.5" />

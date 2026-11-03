@@ -4,22 +4,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   UploadCloud,
-  FileCheck2,
   XCircle,
   Copy,
   ExternalLink,
   Download,
-  AlertCircle,
   CheckCircle2,
   ShieldAlert,
   Loader2,
   FileText,
   Info,
-  ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { calculateFileHash, isValidBytes32Hash } from "../utils/hash";
-import { fetchWork, checkIsRegistered, CONTRACT_ADDRESS } from "../utils/contract";
+import { fetchWork, checkIsRegistered } from "../utils/contract";
 import { formatAddress, formatTimestamp, formatFileSize, copyToClipboard, getEtherscanAddressUrl } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
 
@@ -98,7 +96,7 @@ export default function Verify() {
     }
 
     if (file.size > 100 * 1024 * 1024) {
-      toast("File lớn (>100MB), việc tính hash trên trình duyệt có thể mất vài giây...", {
+      toast("File dung lượng lớn (>100MB), quá trình băm SHA-256 có thể mất vài giây...", {
         icon: "⚠️",
       });
     }
@@ -109,12 +107,10 @@ export default function Verify() {
     try {
       const { hash } = await calculateFileHash(file);
       setInputHash(hash);
-      // Cập nhật URL và chạy tra cứu luôn
-      navigate(`/verify/${hash}`, { replace: true });
       await handleVerifyHash(hash);
     } catch (err) {
-      console.error("Lỗi băm file:", err);
-      toast.error("Không thể băm file: " + err.message);
+      console.error("Lỗi khi băm file:", err);
+      toast.error("Không thể tính mã SHA-256 của file: " + err.message);
     } finally {
       setIsHashing(false);
     }
@@ -125,7 +121,8 @@ export default function Verify() {
     setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e) => {
+    e.preventDefault();
     setIsDragging(false);
   };
 
@@ -138,52 +135,54 @@ export default function Verify() {
   };
 
   const handleCopy = async (text, label) => {
-    const ok = await copyToClipboard(text);
-    if (ok) toast.success(`Đã sao chép ${label}!`);
+    const success = await copyToClipboard(text);
+    if (success) {
+      toast.success(`Đã sao chép ${label}!`);
+    }
   };
 
   const handleDownloadPDF = async () => {
     if (!verifiedWork) return;
     setIsGeneratingPDF(true);
     try {
-      toast.loading("Đang tạo Giấy chứng nhận PDF độ phân giải cao...", { id: "pdf-gen" });
+      toast.loading("Đang xuất file Giấy chứng nhận PDF...", { id: "pdf-verify" });
       await generateCertificatePDF(verifiedWork);
-      toast.success("Tải xuống Giấy chứng nhận thành công!", { id: "pdf-gen" });
+      toast.success("Đã tải Giấy chứng nhận về máy!", { id: "pdf-verify" });
     } catch (err) {
-      console.error("Lỗi tạo PDF:", err);
-      toast.error("Không thể xuất file PDF: " + err.message, { id: "pdf-gen" });
+      console.error("Lỗi xuất PDF:", err);
+      toast.error("Không thể xuất file PDF: " + err.message, { id: "pdf-verify" });
     } finally {
       setIsGeneratingPDF(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10">
-      {/* Tiêu đề trang */}
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* TIÊU ĐỀ TRANG */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-xs font-semibold">
-          <Search className="w-3.5 h-3.5" />
-          <span>Xác minh công khai • Không cần kết nối ví</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#38BDF8] text-xs font-semibold">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Xác minh công khai 100% On-Chain</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
-          Xác Thực Bản Quyền Tác Phẩm
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+          Xác Minh Quyền Sở Hữu Tác Phẩm
         </h1>
-        <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto">
-          Tải file lên để tự động tính hash hoặc nhập trực tiếp mã SHA-256 để tra cứu dữ liệu gốc được bảo chứng trên Ethereum Sepolia.
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+          Tra cứu tính nguyên bản và thông tin quyền sở hữu trí tuệ đã ghi nhận bất biến trên mạng Ethereum Sepolia.
         </p>
       </div>
 
-      {/* KHU VỰC NHẬP LIỆU: DRAG & DROP HOẶC PASTE HASH */}
-      <div className="glass-card bg-[#0A1026]/90 rounded-3xl p-6 sm:p-8 border-white/10 space-y-6 shadow-glass">
-        {/* Vùng kéo thả file */}
+      {/* KHU VỰC NHẬP LIỆU: KÉO THẢ HOẶC DÁN HASH */}
+      <div className="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+        {/* Vùng kéo thả file để tự băm và tra cứu */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
             isDragging
-              ? "border-brand-cyan bg-brand-cyan/10 scale-[1.01]"
-              : "border-white/15 hover:border-brand-blue/50 hover:bg-white/[0.02]"
+              ? "border-[#0066CC] bg-blue-50/50 dark:bg-[#38BDF8]/10 scale-[1.01]"
+              : "border-slate-300 dark:border-white/15 hover:border-[#0066CC] hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
           }`}
           onClick={() => document.getElementById("verify-file-input")?.click()}
         >
@@ -197,28 +196,28 @@ export default function Verify() {
           />
 
           <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-brand-blue/10 border border-brand-blue/20 text-brand-cyan flex items-center justify-center shadow-glow-blue">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/30 text-[#0052CC] dark:text-[#38BDF8] flex items-center justify-center">
               {isHashing ? (
-                <Loader2 className="w-7 h-7 animate-spin text-brand-cyan" />
+                <Loader2 className="w-7 h-7 animate-spin text-[#0066CC] dark:text-[#38BDF8]" />
               ) : (
                 <UploadCloud className="w-7 h-7" />
               )}
             </div>
 
             <div>
-              <p className="text-sm sm:text-base font-semibold text-white">
+              <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-white">
                 {isHashing
                   ? "Đang tính toán mã băm SHA-256 trên trình duyệt..."
                   : "Kéo thả file vào đây hoặc bấm để chọn"}
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Hỗ trợ mọi định dạng: Hình ảnh, Video, MP3, PDF, Mã nguồn,... (File KHÔNG bị tải lên máy chủ)
               </p>
             </div>
 
             {selectedFile && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 font-mono">
-                <FileText className="w-3.5 h-3.5 text-brand-cyan" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs text-slate-700 dark:text-slate-300 font-mono">
+                <FileText className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
                 <span>{selectedFile.name}</span>
                 <span className="text-slate-500">({formatFileSize(selectedFile.size)})</span>
               </div>
@@ -227,9 +226,9 @@ export default function Verify() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="h-px bg-white/10 flex-1" />
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">hoặc nhập mã băm</span>
-          <div className="h-px bg-white/10 flex-1" />
+          <div className="h-px bg-slate-200 dark:bg-white/10 flex-1" />
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">hoặc nhập mã băm</span>
+          <div className="h-px bg-slate-200 dark:bg-white/10 flex-1" />
         </div>
 
         {/* Ô nhập trực tiếp mã SHA-256 */}
@@ -246,13 +245,13 @@ export default function Verify() {
               value={inputHash}
               onChange={(e) => setInputHash(e.target.value)}
               placeholder="Dán mã băm bytes32 (0x7f83b165...)"
-              className="w-full glass-input px-4 py-3.5 rounded-xl font-mono text-xs sm:text-sm text-white placeholder:text-slate-500"
+              className="w-full glass-input px-4 py-3.5 rounded-xl font-mono text-xs sm:text-sm placeholder:text-slate-400"
             />
           </div>
           <button
             type="submit"
             disabled={isSearching || isHashing}
-            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#003399] via-[#0066CC] to-[#38BDF8] hover:opacity-90 text-white text-sm font-semibold shadow-glow-blue flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-95"
+            className="px-6 py-3.5 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-95 shadow-sm"
           >
             {isSearching ? (
               <>
@@ -269,7 +268,7 @@ export default function Verify() {
         </form>
       </div>
 
-      {/* KẾT QUẢ XÁC MINH (VERIFICATION RESULT) */}
+      {/* KẾT QUẢ XÁC MINH */}
       <AnimatePresence mode="wait">
         {verifyStatus === "FOUND" && verifiedWork && (
           <motion.div
@@ -277,22 +276,19 @@ export default function Verify() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="glass-card bg-emerald-950/40 border-emerald-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden"
+            className="glass-card bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden"
           >
-            {/* Vệt sáng xanh emerald */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
             {/* Header kết quả thành công */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-500/20 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-300 dark:border-emerald-500/20 pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-400 dark:border-emerald-500/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-1">
                     Bản quyền hợp lệ 100%
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                     Tác phẩm đã được đăng ký trên Blockchain
                   </h3>
                 </div>
@@ -302,7 +298,7 @@ export default function Verify() {
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
-                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95 disabled:opacity-50"
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95 disabled:opacity-50"
               >
                 {isGeneratingPDF ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -315,28 +311,28 @@ export default function Verify() {
 
             {/* Chi tiết thông tin bản quyền */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
-                <span className="text-xs text-slate-400">Tên tác phẩm:</span>
-                <p className="text-base font-bold text-white">{verifiedWork.title}</p>
+              <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Tên tác phẩm:</span>
+                <p className="text-base font-bold text-slate-900 dark:text-white">{verifiedWork.title}</p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1">
-                <span className="text-xs text-slate-400">Thời gian đăng ký (Giờ VN):</span>
-                <p className="text-base font-bold text-emerald-300">
+              <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Thời gian đăng ký (Giờ VN):</span>
+                <p className="text-base font-bold text-emerald-600 dark:text-emerald-300">
                   {formatTimestamp(verifiedWork.timestamp)}
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1.5 md:col-span-2">
-                <span className="text-xs text-slate-400">Chủ sở hữu hiện tại (Địa chỉ ví):</span>
+              <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5 md:col-span-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Chủ sở hữu hiện tại (Địa chỉ ví):</span>
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <span className="font-mono text-xs sm:text-sm text-brand-cyan break-all">
+                  <span className="font-mono text-xs sm:text-sm text-[#0066CC] dark:text-[#38BDF8] break-all font-semibold">
                     {verifiedWork.owner}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleCopy(verifiedWork.owner, "địa chỉ ví")}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition"
                       title="Sao chép"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -345,7 +341,7 @@ export default function Verify() {
                       href={getEtherscanAddressUrl(verifiedWork.owner)}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition"
+                      className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition"
                       title="Xem trên Sepolia Etherscan"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -355,23 +351,23 @@ export default function Verify() {
               </div>
 
               {verifiedWork.description && (
-                <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1 md:col-span-2">
-                  <span className="text-xs text-slate-400">Mô tả tác phẩm:</span>
-                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{verifiedWork.description}</p>
+                <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1 md:col-span-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Mô tả tác phẩm:</span>
+                  <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">{verifiedWork.description}</p>
                 </div>
               )}
 
-              <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-1.5 md:col-span-2">
+              <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5 md:col-span-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Mã băm SHA-256 (File Hash):</span>
+                  <span className="text-slate-500 dark:text-slate-400">Mã băm SHA-256 (File Hash):</span>
                   <button
                     onClick={() => handleCopy(verifiedWork.fileHash, "mã băm")}
-                    className="inline-flex items-center gap-1 text-brand-cyan hover:underline"
+                    className="inline-flex items-center gap-1 text-[#0066CC] dark:text-[#38BDF8] hover:underline font-medium"
                   >
                     <Copy className="w-3 h-3" /> Sao chép
                   </button>
                 </div>
-                <p className="font-mono text-xs text-[#38BDF8] break-all bg-black/40 p-2.5 rounded-xl border border-white/5">
+                <p className="font-mono text-xs text-[#0066CC] dark:text-[#38BDF8] break-all bg-slate-100 dark:bg-black/40 p-2.5 rounded-xl border border-slate-200 dark:border-white/5 font-medium">
                   {verifiedWork.fileHash}
                 </p>
               </div>
@@ -385,30 +381,30 @@ export default function Verify() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="glass-card bg-rose-950/30 border-rose-500/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl"
+            className="glass-card bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-500/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl"
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-500/40 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
                 <XCircle className="w-7 h-7" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-xl font-bold text-white">Chưa có bản ghi trên Blockchain</h3>
-                <p className="text-sm text-slate-300 leading-relaxed">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Chưa có bản ghi trên Blockchain</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   Mã băm này chưa từng được đăng ký trong Smart Contract của CopyrightChain trên Ethereum Sepolia.
                 </p>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-2 text-xs text-slate-400">
-              <p className="font-semibold text-rose-300 flex items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-rose-400" />
+            <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+              <p className="font-semibold text-rose-600 dark:text-rose-300 flex items-center gap-1.5">
+                <ShieldAlert className="w-4 h-4 text-rose-500" />
                 Lưu ý quan trọng về tính toàn vẹn file:
               </p>
               <p>
                 Nếu file đã từng được đăng ký trước đó nhưng bị chỉnh sửa (dù chỉ thay đổi 1 dấu chấm, 1 pixel hoặc 1 byte metadata), mã SHA-256 sẽ hoàn toàn khác biệt và hệ thống sẽ không nhận diện được.
               </p>
-              <div className="pt-1 font-mono text-[11px] text-slate-400 break-all">
-                Hash vừa kiểm tra: <span className="text-slate-200">{searchedHash}</span>
+              <div className="pt-1 font-mono text-[11px] text-slate-500 dark:text-slate-400 break-all">
+                Hash vừa kiểm tra: <span className="text-slate-800 dark:text-slate-200 font-medium">{searchedHash}</span>
               </div>
             </div>
           </motion.div>
@@ -416,31 +412,31 @@ export default function Verify() {
       </AnimatePresence>
 
       {/* KHỐI GIẢI THÍCH TRỰC QUAN: HIỆU ỨNG TUYẾT LỞ (AVALANCHE EFFECT) */}
-      <div className="glass-card bg-white/[0.02] border-white/10 rounded-2xl p-6 space-y-4">
+      <div className="glass-card rounded-2xl p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-brand-blue/10 text-brand-cyan">
+          <div className="p-2 rounded-lg bg-blue-50 dark:bg-[#0066CC]/15 text-[#0066CC] dark:text-[#38BDF8]">
             <Info className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white">
               Vì sao chỉ thay đổi 1 byte làm mã băm biến đổi hoàn toàn?
             </h4>
-            <p className="text-xs text-slate-400">Nguyên lý mật mã học SHA-256 (Hiệu ứng Tuyết lở - Avalanche Effect)</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Nguyên lý mật mã học SHA-256 (Hiệu ứng Tuyết lở - Avalanche Effect)</p>
           </div>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           Thuật toán mật mã học SHA-256 được thiết kế với cơ chế khuếch tán nghiêm ngặt. Khi nội dung file thay đổi dù chỉ một bit (0 sang 1), hơn 50% các ký tự trong chuỗi băm 64 chữ số hex sẽ bị đảo lộn. Do đó, không ai có thể làm giả hoặc sửa đổi bất kỳ nội dung nào của tác phẩm sau khi đã được cấp chứng nhận.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-mono">
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5 space-y-1">
-            <span className="text-emerald-400">Nội dung: "TacPhamGoc"</span>
-            <p className="text-slate-400 break-all">Hash: 0x9f83a...3b21</p>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1">
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Nội dung: "TacPhamGoc"</span>
+            <p className="text-slate-500 dark:text-slate-400 break-all">Hash: 0x9f83a...3b21</p>
           </div>
-          <div className="p-3 rounded-xl bg-black/30 border border-white/5 space-y-1">
-            <span className="text-rose-400">Nội dung: "TacPhamGoc." (thêm 1 dấu chấm)</span>
-            <p className="text-slate-400 break-all">Hash: 0x4e12c...99fd (khác hoàn toàn)</p>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1">
+            <span className="text-rose-600 dark:text-rose-400 font-semibold">Nội dung: "TacPhamGoc." (thêm 1 dấu chấm)</span>
+            <p className="text-slate-500 dark:text-slate-400 break-all">Hash: 0x4e12c...99fd (khác hoàn toàn)</p>
           </div>
         </div>
       </div>

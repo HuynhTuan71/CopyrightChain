@@ -12,7 +12,7 @@ import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
-    <div className="relative min-h-screen flex flex-col bg-background text-slate-100 font-sans selection:bg-brand-blue selection:text-white">
+    <div className="relative min-h-screen flex flex-col font-sans transition-colors duration-250 selection:bg-[#0066CC] selection:text-white text-slate-800 dark:text-slate-100">
       {/* Nền hiệu ứng quầng sáng và lưới vi mô */}
       <BackgroundGlow />
 
@@ -34,11 +34,11 @@ export default function App() {
       {/* Chân trang */}
       <Footer />
 
-      {/* Thông báo dạng Toast với phong cách Dark Glassmorphism */}
+      {/* Thông báo dạng Toast hỗ trợ cả Sáng và Tối */}
       <Toaster
         position="top-right"
         toastOptions={{
-          className: "!bg-[#0B1229]/95 !text-slate-100 !border !border-white/10 !backdrop-blur-xl !shadow-2xl !text-sm !rounded-2xl !px-4 !py-3 font-sans",
+          className: "!bg-white dark:!bg-[#0B1229] !text-slate-800 dark:!text-slate-100 !border !border-slate-200 dark:!border-white/10 !shadow-2xl !text-sm !rounded-2xl !px-4 !py-3 font-sans",
           duration: 4000,
           success: {
             iconTheme: {
