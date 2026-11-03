@@ -84,17 +84,17 @@ export const WalletProvider = ({ children }) => {
       toast(
         (t) => (
           <div className="flex flex-col gap-2">
-            <span className="font-semibold text-amber-300">
+            <span className="font-semibold text-amber-500">
               Chưa cài đặt ví MetaMask!
             </span>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-slate-600 dark:text-slate-300">
               Vui lòng cài đặt tiện ích MetaMask trên trình duyệt để kết nối.
             </span>
             <a
               href="https://metamask.io/download/"
               target="_blank"
               rel="noreferrer"
-              className="text-xs bg-brand-blue hover:bg-blue-600 text-white font-medium px-3 py-1.5 rounded-lg text-center mt-1 transition-all"
+              className="text-xs btn-primary font-medium px-3 py-1.5 rounded-lg text-center mt-1 transition-all"
             >
               Tải MetaMask ngay
             </a>
@@ -105,7 +105,10 @@ export const WalletProvider = ({ children }) => {
       return;
     }
 
+    // Xoá cờ ngắt kết nối thủ công
+    localStorage.removeItem("wallet_manually_disconnected");
     setIsConnecting(true);
+
     try {
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await browserProvider.send("eth_requestAccounts", []);
@@ -124,11 +127,11 @@ export const WalletProvider = ({ children }) => {
 
         if (currentChainId !== TARGET_CHAIN_ID) {
           toast.custom((t) => (
-            <div className="glass-card bg-amber-950/80 border-amber-500/40 p-4 rounded-xl shadow-xl flex flex-col gap-2 max-w-sm">
-              <p className="font-semibold text-amber-300 text-sm">
+            <div className="glass-card bg-amber-50 dark:bg-amber-950/80 border-amber-300 dark:border-amber-500/40 p-4 rounded-xl shadow-xl flex flex-col gap-2 max-w-sm">
+              <p className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
                 ⚠️ Sai mạng kết nối!
               </p>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-600 dark:text-slate-300">
                 DApp hoạt động trên mạng <strong>Ethereum Sepolia</strong>. Vui lòng chuyển mạng để tiếp tục.
               </p>
               <button
@@ -159,18 +162,41 @@ export const WalletProvider = ({ children }) => {
   };
 
   // Ngắt kết nối ví
-  const disconnectWallet = () => {
+  const disconnectWallet = async () => {
+    // 1. Đánh dấu cờ người dùng đã chủ động đăng xuất khỏi web
+    localStorage.setItem("wallet_manually_disconnected", "true");
+
+    // 2. Xóa sạch state người dùng trong ứng dụng
     setAccount("");
     setSigner(null);
     setBalance("0");
-    toast("Đã ngắt kết nối ví", { icon: "🔌" });
+
+    // 3. Yêu cầu MetaMask thu hồi quyền truy cập của trang web (EIP-2255) nếu tiện ích hỗ trợ
+    try {
+      if (window.ethereum?.request) {
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }],
+        });
+      }
+    } catch (err) {
+      // Nếu tiện ích MetaMask phiên bản cũ chưa hỗ trợ revokePermissions thì bỏ qua
+    }
+
+    toast("Đã đăng xuất và ngắt kết nối ví", { icon: "🔌" });
   };
 
   // Lắng nghe sự kiện đổi tài khoản hoặc đổi mạng từ MetaMask
   useEffect(() => {
     if (!window.ethereum) return;
 
+    // Kiểm tra kết nối sẵn có khi vừa vào web
     const checkExistingConnection = async () => {
+      // Nếu người dùng đã bấm "Ngắt kết nối" trước đó, không được tự động đăng nhập lại
+      if (localStorage.getItem("wallet_manually_disconnected") === "true") {
+        return;
+      }
+
       try {
         const browserProvider = new ethers.BrowserProvider(window.ethereum);
         const accounts = await browserProvider.send("eth_accounts", []);
@@ -192,21 +218,27 @@ export const WalletProvider = ({ children }) => {
 
     const handleAccountsChanged = (accounts) => {
       if (accounts.length === 0) {
-        disconnectWallet();
-      } else if (accounts[0] !== account) {
-        setAccount(accounts[0]);
-        if (provider) {
-          provider.getSigner().then(setSigner);
-          updateBalance(accounts[0], provider);
+        // Người dùng đã ngắt kết nối từ tiện ích MetaMask
+        localStorage.setItem("wallet_manually_disconnected", "true");
+        setAccount("");
+        setSigner(null);
+        setBalance("0");
+      } else {
+        // Khi người dùng chuyển sang tài khoản khác trên MetaMask
+        if (localStorage.getItem("wallet_manually_disconnected") !== "true") {
+          setAccount(accounts[0]);
+          const browserProvider = new ethers.BrowserProvider(window.ethereum);
+          setProvider(browserProvider);
+          browserProvider.getSigner().then(setSigner);
+          updateBalance(accounts[0], browserProvider);
+          toast.success("Đã đổi sang ví: " + accounts[0].slice(0, 6) + "..." + accounts[0].slice(-4));
         }
-        toast.success("Đã đổi địa chỉ ví!");
       }
     };
 
     const handleChainChanged = (newChainId) => {
       const parsedChainId = parseInt(newChainId, 16);
       setChainId(parsedChainId);
-      // Khi đổi mạng, nên làm mới provider
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
       setProvider(browserProvider);
       if (account) {
@@ -224,7 +256,7 @@ export const WalletProvider = ({ children }) => {
         window.ethereum.removeListener("chainChanged", handleChainChanged);
       }
     };
-  }, [account, provider, updateBalance]);
+  }, [updateBalance]); // Chỉ phụ thuộc vào updateBalance, KHÔNG đưa account vào đây để tránh vòng lặp re-connect!
 
   return (
     <WalletContext.Provider
