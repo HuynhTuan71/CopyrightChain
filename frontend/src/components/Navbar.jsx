@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -253,28 +254,30 @@ export default function Navbar() {
       </div>
 
       {/* Sidebar Drawer xuất hiện từ bên phải trên Mobile */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] md:hidden">
-            {/* Lớp nền mờ (Backdrop Overlay) */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
-              aria-hidden="true"
-            />
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <div className="fixed inset-0 z-[9999] md:hidden">
+                {/* Lớp nền mờ (Backdrop Overlay) */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                  aria-hidden="true"
+                />
 
-            {/* Khung Sidebar trượt từ bên phải qua (Slide-in from Right) */}
-            <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 260 }}
-              className="fixed inset-y-0 right-0 w-[85%] max-w-xs sm:max-w-sm bg-white dark:bg-[#071329] border-l border-slate-200 dark:border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto p-5 z-[101]"
-            >
+                {/* Khung Sidebar trượt từ bên phải qua (Slide-in from Right) */}
+                <motion.aside
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 28, stiffness: 260 }}
+                  className="fixed inset-y-0 right-0 w-[85%] max-w-xs sm:max-w-sm h-full bg-white dark:bg-[#071329] border-l border-slate-200 dark:border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto p-5 z-[10000]"
+                >
               {/* PHẦN TRÊN: Header & Danh sách điều hướng */}
               <div className="space-y-6">
                 {/* Header thanh Sidebar */}
@@ -433,7 +436,9 @@ export default function Navbar() {
             </motion.aside>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
     </nav>
   );
 }
