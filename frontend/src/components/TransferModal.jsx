@@ -77,12 +77,12 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-lg bg-white dark:bg-[#061129] border border-slate-200 dark:border-white/15 rounded-2xl p-6 shadow-2xl"
+          className="relative w-full max-w-lg bg-white dark:bg-[#061129] border border-slate-200 dark:border-white/15 rounded-2xl p-4 sm:p-6 shadow-2xl"
         >
           {/* Nút đóng */}
           <button

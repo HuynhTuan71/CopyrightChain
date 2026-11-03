@@ -116,21 +116,21 @@ export default function MyWorks() {
   return (
     <div className="space-y-8">
       {/* HEADER & TÌM KIẾM */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 dark:border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 border-b border-slate-200 dark:border-white/10 pb-4 sm:pb-6">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#93C5FD] text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#93C5FD] text-[11px] sm:text-xs font-semibold">
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Bộ sưu tập cá nhân ({works.length} tác phẩm)</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Tác Phẩm Của Tôi</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Tác Phẩm Của Tôi</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Quản lý quyền sở hữu, xuất giấy chứng nhận PDF và thực hiện chuyển nhượng bản quyền.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
           {/* Ô tìm kiếm */}
-          <div className="relative w-full sm:w-64">
+          <div className="relative flex-1 sm:w-64">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -141,24 +141,26 @@ export default function MyWorks() {
             />
           </div>
 
-          {/* Nút làm mới danh sách */}
-          <button
-            onClick={loadWorks}
-            disabled={isLoading}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition disabled:opacity-50"
-            title="Làm mới dữ liệu từ Blockchain"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          </button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Nút làm mới danh sách */}
+            <button
+              onClick={loadWorks}
+              disabled={isLoading}
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition disabled:opacity-50 flex-shrink-0"
+              title="Làm mới dữ liệu từ Blockchain"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            </button>
 
-          {/* Nút đăng ký mới */}
-          <Link
-            to="/register"
-            className="px-4 py-2.5 rounded-xl btn-primary text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition active:scale-95 flex-shrink-0 shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Đăng ký mới</span>
-          </Link>
+            {/* Nút đăng ký mới */}
+            <Link
+              to="/register"
+              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl btn-primary text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Đăng ký mới</span>
+            </Link>
+          </div>
         </div>
       </div>
 

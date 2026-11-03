@@ -6,9 +6,9 @@ import { formatAddress, getEtherscanAddressUrl } from "../utils/format";
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#050814]/90 mt-24 py-12 relative z-10 transition-colors duration-250">
+    <footer className="w-full border-t border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#050814]/90 mt-16 sm:mt-24 py-8 sm:py-12 relative z-10 transition-colors duration-250">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Cột 1: Thông tin thương hiệu */}
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-2.5">
@@ -67,7 +67,7 @@ export default function Footer() {
         </div>
 
         {/* Chân trang đáy */}
-        <div className="pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <div className="pt-6 sm:pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3 sm:gap-4 text-center sm:text-left">
           <p>
             © {new Date().getFullYear()} CopyrightChain. Tất cả các quyền được bảo lưu.
           </p>

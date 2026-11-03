@@ -20,7 +20,7 @@ export default function App() {
       <Navbar />
 
       {/* Vùng nội dung trang */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 flex-grow w-full">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-12 sm:pb-16 flex-grow w-full">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />

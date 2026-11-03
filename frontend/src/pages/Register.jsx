@@ -247,50 +247,50 @@ export default function Register() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-2xl mx-auto space-y-6"
       >
-        <div className="glass-card bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/30 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-xl relative overflow-hidden">
-          <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10" />
+        <div className="glass-card bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-500/30 rounded-2xl sm:rounded-3xl p-5 sm:p-10 text-center space-y-5 sm:space-y-6 shadow-xl relative overflow-hidden">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-500 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
+            <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
           </div>
 
-          <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Giao dịch thành công</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+          <div className="space-y-1.5 sm:space-y-2">
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Giao dịch thành công</span>
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
               Chúc mừng! Bản quyền đã được xác lập
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
               Tác phẩm <strong className="text-slate-900 dark:text-white">"{registeredData.title}"</strong> đã chính thức thuộc quyền sở hữu của bạn trên mạng Ethereum Sepolia.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-left space-y-2 text-xs">
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
+          <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-left space-y-2 text-xs">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-slate-500 dark:text-slate-400 gap-1">
               <span>Mã giao dịch (Tx Hash):</span>
               <a
                 href={getEtherscanTxUrl(txHash)}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-[#0066CC] dark:text-[#38BDF8] hover:underline flex items-center gap-1"
+                className="font-mono text-[#0066CC] dark:text-[#38BDF8] hover:underline flex items-center gap-1 break-all"
               >
                 {formatAddress(txHash, 8, 6)}
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3 h-3 flex-shrink-0" />
               </a>
             </div>
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-slate-500 dark:text-slate-400 gap-1">
               <span>Mã SHA-256:</span>
-              <span className="font-mono text-[#0066CC] dark:text-[#60A5FA]">{formatAddress(registeredData.fileHash, 10, 8)}</span>
+              <span className="font-mono text-[#0066CC] dark:text-[#60A5FA] break-all">{formatAddress(registeredData.fileHash, 10, 8)}</span>
             </div>
-            <div className="flex justify-between items-center text-slate-500 dark:text-slate-400">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-slate-500 dark:text-slate-400 gap-1">
               <span>Chủ sở hữu:</span>
-              <span className="font-mono text-slate-800 dark:text-slate-200">{formatAddress(registeredData.owner, 8, 6)}</span>
+              <span className="font-mono text-slate-800 dark:text-slate-200 break-all">{formatAddress(registeredData.owner, 8, 6)}</span>
             </div>
           </div>
 
           {/* Các nút hành động sau khi thành công */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2">
             <button
               onClick={handleDownloadCertificate}
               disabled={isGeneratingPDF}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
             >
               {isGeneratingPDF ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -302,7 +302,7 @@ export default function Register() {
 
             <button
               onClick={handleResetForm}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/10 hover:bg-slate-50 dark:hover:bg-white/15 text-slate-700 dark:text-white font-semibold text-sm flex items-center justify-center gap-2 transition"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/10 hover:bg-slate-50 dark:hover:bg-white/15 text-slate-700 dark:text-white font-semibold text-sm flex items-center justify-center gap-2 transition"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Đăng ký tác phẩm khác</span>
@@ -323,22 +323,22 @@ export default function Register() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
       {/* Tiêu đề trang */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#38BDF8] text-xs font-semibold">
+      <div className="text-center space-y-2 sm:space-y-3 px-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#38BDF8] text-[11px] sm:text-xs font-semibold">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Ghi nhận quyền tác giả On-Chain</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
           Đăng Ký Bản Quyền Tác Phẩm
         </h1>
-        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
+        <p className="text-xs sm:text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
           Tải file lên để băm SHA-256 trực tiếp trên máy bạn và lưu trữ thông tin sở hữu vĩnh viễn trên Ethereum Sepolia.
         </p>
       </div>
 
-      <form onSubmit={handleSubmitRegister} className="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+      <form onSubmit={handleSubmitRegister} className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 space-y-5 sm:space-y-6">
         {/* 1. KHU VỰC KÉO THẢ FILE */}
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">

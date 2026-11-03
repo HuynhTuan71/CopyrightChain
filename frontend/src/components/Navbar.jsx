@@ -55,19 +55,19 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/90 dark:bg-[#040B1A]/95 border-b border-slate-200 dark:border-white/[0.08] transition-colors duration-250">
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/95 dark:bg-[#040B1A]/95 border-b border-slate-200 dark:border-white/[0.08] transition-colors duration-250">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Tên dự án */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-[#0052CC] p-0.5 shadow-sm transition-transform group-hover:scale-105 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#0052CC] p-0.5 shadow-sm transition-transform group-hover:scale-105 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">
+              <span className="font-extrabold text-base sm:text-xl tracking-tight text-slate-900 dark:text-white leading-tight">
                 Copyright<span className="text-[#0066CC] dark:text-[#38BDF8]">Chain</span>
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-[#93C5FD] font-semibold -mt-1">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest text-slate-500 dark:text-[#93C5FD] font-semibold">
                 Bản quyền Blockchain
               </span>
             </div>
@@ -203,19 +203,21 @@ export default function Navbar() {
           </div>
 
           {/* Nút Hamburger & Toggle Theme cho Mobile */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-1.5">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300"
-              title="Chế độ Sáng / Tối"
+              className="p-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 active:scale-95 transition"
+              title={isDark ? "Chuyển sang giao diện Sáng" : "Chuyển sang giao diện Tối"}
+              aria-label="Toggle Theme"
             >
-              {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300"
+              className="p-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 active:scale-95 transition"
+              aria-label="Menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -223,7 +225,8 @@ export default function Navbar() {
 
       {/* Menu thả xuống trên Mobile */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-[#040B1A] border-t border-slate-200 dark:border-white/[0.08] px-4 pt-3 pb-6 space-y-3 shadow-xl">
+        <div className="md:hidden bg-white dark:bg-[#040B1A] border-t border-slate-200 dark:border-white/[0.08] px-4 pt-3 pb-6 space-y-3 shadow-2xl animate-in slide-in-from-top-2">
+          {/* Danh sách liên kết điều hướng */}
           <div className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
@@ -231,10 +234,10 @@ export default function Navbar() {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-medium ${
+                  className={`px-4 py-2.5 rounded-xl text-sm font-medium transition ${
                     isActive
                       ? "bg-[#0052CC]/10 text-[#0052CC] dark:bg-[#0066CC]/20 dark:text-[#38BDF8] font-bold"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
                   }`}
                 >
                   {link.name}
@@ -243,12 +246,13 @@ export default function Navbar() {
             })}
           </div>
 
+          {/* Vùng ví trên Mobile */}
           <div className="pt-2 border-t border-slate-200 dark:border-white/10">
             {!account ? (
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="w-full py-2.5 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2 shadow-sm"
               >
                 <Wallet className="w-4 h-4" />
                 {isConnecting ? "Đang kết nối..." : "Kết nối MetaMask"}
@@ -256,22 +260,43 @@ export default function Navbar() {
             ) : !isCorrectNetwork ? (
               <button
                 onClick={switchToSepolia}
-                className="w-full py-2.5 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 text-sm font-medium border border-amber-500/30 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-300 text-sm font-medium border border-amber-500/30 flex items-center justify-center gap-2"
               >
                 <AlertCircle className="w-4 h-4" />
                 Chuyển sang mạng Sepolia
               </button>
             ) : (
-              <div className="space-y-2">
-                <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Ví: {formatAddress(account)}</span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">{parseFloat(balance).toFixed(3)} SEP</span>
+              <div className="space-y-2 p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Số dư ví:</span>
+                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{parseFloat(balance).toFixed(3)} SEP</span>
+                </div>
+                <div className="text-xs font-mono text-slate-800 dark:text-slate-200 truncate py-1">
+                  {account}
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                  <button
+                    onClick={handleCopy}
+                    className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                    <span>Sao chép</span>
+                  </button>
+                  <a
+                    href={getEtherscanAddressUrl(account)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-[#0066CC] dark:text-[#38BDF8]" />
+                    <span>Etherscan</span>
+                  </a>
                 </div>
                 <button
                   onClick={disconnectWallet}
-                  className="w-full py-2 text-xs text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/20 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 font-medium"
+                  className="w-full mt-1 py-2 text-xs text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/20 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 font-medium"
                 >
-                  Ngắt kết nối
+                  Ngắt kết nối ví
                 </button>
               </div>
             )}
