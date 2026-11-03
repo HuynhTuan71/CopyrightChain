@@ -13,9 +13,6 @@
 6. [Hướng dẫn cài đặt & Cấu hình .env](#-6-hướng-dẫn-cài-đặt--cấu-hình-env)
 7. [Chạy kiểm thử & Triển khai Smart Contract](#-7-chạy-kiểm-thử--triển-khai-smart-contract)
 8. [Khởi chạy Giao diện Frontend](#-8-khởi-chạy-giao-diện-frontend)
-9. [Kịch bản Demo báo cáo](#-9-kịch-bản-demo-báo-cáo)
-10. [Hạn chế & Hướng phát triển](#-10-hạn-chế--hướng-phát-triển)
-
 ---
 
 ## 💡 1. Giới thiệu & Ý tưởng hệ thống
@@ -238,49 +235,3 @@ Nếu muốn kiểm tra bản build đóng gói sản phẩm:
 npm run build
 npm run preview
 ```
-
----
-
-## 🎬 9. Kịch bản Demo báo cáo đồ án
-
-Để có một buổi thuyết trình hoặc chấm đồ án ấn tượng và mạch lạc, bạn có thể thực hiện theo kịch bản 5 bước sau:
-
-1. **Bước 1: Đăng ký tác phẩm A lần đầu tiên**
-   - Kết nối ví MetaMask (Ví 1).
-   - Vào mục **Đăng ký**, tải lên file ảnh `tranh_ve_goc.png`.
-   - Hệ thống tự động tính ra mã SHA-256 trên trình duyệt và thông báo tác phẩm chưa từng được đăng ký.
-   - Nhập tên: *"Bức tranh kỹ thuật số Hoàng Hôn"* và bấm **Đăng ký bản quyền**.
-   - Xác nhận trên MetaMask. Màn hình hiện hiệu ứng chúc mừng kèm link giao dịch trên Sepolia Etherscan.
-   - Bấm nút **Tải Giấy chứng nhận PDF** để xem bằng khen A4 có mã QR.
-2. **Bước 2: Chứng minh tính chống trùng lặp (Chống đạo nhái)**
-   - Chuyển sang ví MetaMask khác (Ví 2) hoặc vẫn dùng Ví 1.
-   - Thử tải lại chính file ảnh `tranh_ve_goc.png` vào trang **Đăng ký**.
-   - **Kết quả:** Hệ thống lập tức hiện cảnh báo màu vàng: *"TÁC PHẨM ĐÃ ĐƯỢC ĐĂNG KÝ BẢN QUYỀN!"*, hiển thị tên tác phẩm và địa chỉ ví của tác giả gốc (Ví 1), đồng thời nút đăng ký bị khóa.
-3. **Bước 3: Chứng minh tính toàn vẹn (Hiệu ứng tuyết lở - Avalanche Effect)**
-   - Dùng phần mềm chỉnh sửa (Paint/Photoshop) thay đổi đúng **1 pixel** trên bức tranh hoặc đổi 1 ký tự trong file text rồi lưu lại thành `tranh_ve_sua_1_byte.png`.
-   - Vào trang **Xác minh** (có thể ngắt kết nối ví để chứng minh không cần ví).
-   - Tải file đã sửa lên.
-   - **Kết quả:** Hệ thống hiện thẻ cảnh báo màu đỏ: *"Chưa có bản ghi trên Blockchain"*, chứng minh rằng bất kỳ ai sửa đổi file đều bị phát hiện ngay lập tức.
-4. **Bước 4: Xác minh tác phẩm gốc bằng mã QR hoặc link trực tiếp**
-   - Quét mã QR trên Giấy chứng nhận PDF vừa tải ở Bước 1 bằng điện thoại hoặc truy cập đường link `/verify/:hash`.
-   - **Kết quả:** Màn hình trả về Thẻ xanh hợp lệ 100%, hiển thị chuẩn xác tên tác phẩm, ngày giờ đăng ký theo múi giờ Việt Nam và địa chỉ ví sở hữu.
-5. **Bước 5: Chuyển nhượng quyền sở hữu bản quyền**
-   - Kết nối lại Ví 1, vào trang **Tác phẩm của tôi**.
-   - Bấm nút **Chuyển quyền** tại tác phẩm vừa tạo.
-   - Nhập địa chỉ Ví 2. Hệ thống kiểm tra địa chỉ hợp lệ và hiển thị cảnh báo không thể hoàn tác.
-   - Xác nhận giao dịch. Sau khi thợ đào xác nhận, tác phẩm lập tức biến mất khỏi danh mục của Ví 1 và chuyển sang xuất hiện trong trang **Tác phẩm của tôi** của Ví 2.
-
----
-
-## ⚖️ 10. Hạn chế & Hướng phát triển
-
-### 10.1. Hạn chế của hệ thống hiện tại
-- **Chứng minh ưu tiên thời gian (Proof of Existence & Timestamp), chưa xác thực danh tính pháp lý thật:** Hệ thống chứng minh được chính xác **ai sở hữu địa chỉ ví đó đã đăng ký nội dung đó đầu tiên vào thời điểm nào**, nhưng chưa thể xác định được người đứng sau địa chỉ ví ngoài đời thực là ai nếu họ không định danh trước.
-- **Rủi ro người xấu đăng ký trước:** Nếu tác giả làm lộ file trước khi đăng ký trên blockchain, người khác có thể mang file đi tính hash và đăng ký trước.
-- **Dữ liệu nhị phân nguyên vẹn:** Nếu một bức ảnh chỉ bị nén lại (re-encode làm đổi dung lượng byte) thì hash sẽ đổi, dù mắt người nhìn nội dung vẫn giống nhau.
-
-### 10.2. Hướng mở rộng và phát triển tương lai
-1. **Tích hợp xác thực danh tính phi tập trung (Decentralized Identity - DID / Soulbound Tokens):** Liên kết địa chỉ ví với danh tính học sinh, nghệ sĩ hoặc CCCD số bằng giải pháp Zero-Knowledge Proofs (ZKP) để xác thực tác giả thật mà vẫn bảo mật thông tin cá nhân.
-2. **Lưu trữ phi tập trung IPFS / Filecoin / Arweave:** Tùy chọn cho phép tác giả mã hóa file gốc và lưu trữ vĩnh viễn trên mạng lưu trữ phi tập trung thay vì chỉ giữ mã hash.
-3. **Thuật toán Perceptual Hash (pHash):** Kết hợp thêm thuật toán băm nhận thức (pHash) bên cạnh mã SHA-256 để phát hiện các tác phẩm bị cắt xén nhẹ, giảm độ phân giải hoặc chỉnh sửa màu sắc.
-4. **Thị trường mua bán & Cấp phép bản quyền (Licensing Marketplace):** Mở rộng Smart Contract hỗ trợ tạo hợp đồng chia sẻ doanh thu (Royalty Fees) hoặc cho phép thuê quyền sử dụng tác phẩm bằng token/NFT.
