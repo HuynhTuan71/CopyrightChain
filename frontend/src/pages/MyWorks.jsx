@@ -37,6 +37,7 @@ export default function MyWorks() {
   const [selectedWorkForTransfer, setSelectedWorkForTransfer] = useState(null);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [downloadingHash, setDownloadingHash] = useState(null);
+  const [selectedIpfsWork, setSelectedIpfsWork] = useState(null);
 
   // Tải danh sách tác phẩm của ví đang kết nối
   const loadWorks = useCallback(async () => {
@@ -336,6 +337,15 @@ export default function MyWorks() {
         signer={signer}
         currentAccount={account}
         onSuccess={loadWorks}
+      />
+
+      {/* MODAL CHI TIẾT IPFS */}
+      <IPFSPreviewModal
+        isOpen={Boolean(selectedIpfsWork)}
+        onClose={() => setSelectedIpfsWork(null)}
+        ipfsHash={selectedIpfsWork?.ipfsHash}
+        title={selectedIpfsWork?.title}
+        previewUrl={selectedIpfsWork ? getLocalPreview(selectedIpfsWork.ipfsHash) : null}
       />
     </div>
   );
