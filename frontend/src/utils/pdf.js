@@ -7,7 +7,7 @@ import { formatTimestamp, formatAddress } from "./format";
  * Phong cách màu sắc: Tông Xanh Kỹ thuật - Công nghệ chuẩn Đại học Cần Thơ (CTUET)
  * (#003399 - #0066CC - #38BDF8) kết hợp nền xanh đêm sang trọng.
  *
- * @param {Object} work Thông tin tác phẩm { fileHash, owner, title, description, timestamp }
+ * @param {Object} work Thông tin tác phẩm { fileHash, owner, title, description, cleanDescription, ipfsHash, pHash, timestamp }
  */
 export async function generateCertificatePDF(work) {
   if (!work) {
@@ -73,7 +73,7 @@ export async function generateCertificatePDF(work) {
 
   ctx.font = '400 24px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#64748B";
-  ctx.fillText("NỀN TẢNG BLOCKCHAIN ETHEREUM SEPOLIA", width / 2, 215);
+  ctx.fillText("NỀN TẢNG BLOCKCHAIN ETHEREUM SEPOLIA & IPFS DECENTRALIZED STORAGE", width / 2, 215);
 
   // Tiêu đề chính: Gradient Xanh CTUET (#38BDF8 -> #2979FF -> #60A5FA)
   const titleGrad = ctx.createLinearGradient(width / 2 - 400, 0, width / 2 + 400, 0);
@@ -99,19 +99,19 @@ export async function generateCertificatePDF(work) {
   ctx.fillText(
     "Hệ thống trân trọng chứng nhận quyền sở hữu tác phẩm kỹ thuật số cho:",
     width / 2,
-    420
+    415
   );
 
   // Tên tác phẩm nổi bật
-  ctx.font = '700 58px "Be Vietnam Pro", sans-serif';
+  ctx.font = '700 54px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(`“ ${work.title} ”`, width / 2, 510);
+  ctx.fillText(`“ ${work.title} ”`, width / 2, 495);
 
   // 5. Khung thông tin kỹ thuật Blockchain
   const boxX = 200;
-  const boxY = 580;
+  const boxY = 550;
   const boxW = width - 400;
-  const boxH = 650;
+  const boxH = 700;
 
   ctx.fillStyle = "rgba(0, 51, 153, 0.08)";
   ctx.fillRect(boxX, boxY, boxW, boxH);
@@ -121,52 +121,79 @@ export async function generateCertificatePDF(work) {
 
   ctx.textAlign = "left";
 
-  // Thông tin: Chủ sở hữu (Địa chỉ ví)
-  ctx.font = '500 30px "Be Vietnam Pro", sans-serif';
-  ctx.fillStyle = "#94A3B8";
-  ctx.fillText("Chủ sở hữu bản quyền (Địa chỉ ví):", boxX + 60, boxY + 80);
+  let currentY = boxY + 65;
 
-  ctx.font = '600 34px "JetBrains Mono", monospace';
+  // Thông tin: Chủ sở hữu (Địa chỉ ví)
+  ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
+  ctx.fillStyle = "#94A3B8";
+  ctx.fillText("Chủ sở hữu bản quyền (Địa chỉ ví):", boxX + 60, currentY);
+
+  ctx.font = '600 32px "JetBrains Mono", monospace';
   ctx.fillStyle = "#38BDF8";
-  ctx.fillText(work.owner, boxX + 60, boxY + 130);
+  ctx.fillText(work.owner, boxX + 60, currentY + 45);
+
+  currentY += 105;
 
   // Thông tin: Thời điểm ghi nhận trên Blockchain
-  ctx.font = '500 30px "Be Vietnam Pro", sans-serif';
+  ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#94A3B8";
-  ctx.fillText("Thời gian đăng ký (Giờ Việt Nam):", boxX + 60, boxY + 210);
+  ctx.fillText("Thời gian đăng ký (Giờ Việt Nam):", boxX + 60, currentY);
 
-  ctx.font = '600 34px "Be Vietnam Pro", sans-serif';
+  ctx.font = '600 32px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#34D399";
-  ctx.fillText(formatTimestamp(work.timestamp), boxX + 60, boxY + 260);
+  ctx.fillText(formatTimestamp(work.timestamp), boxX + 60, currentY + 45);
 
-  // Thông tin: Mô tả tác phẩm
-  if (work.description) {
-    ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
-    ctx.fillStyle = "#94A3B8";
-    ctx.fillText("Mô tả tác phẩm:", boxX + 60, boxY + 340);
-
-    ctx.font = '400 28px "Be Vietnam Pro", sans-serif';
-    ctx.fillStyle = "#E2E8F0";
-    const desc = work.description.length > 90 ? work.description.slice(0, 87) + "..." : work.description;
-    ctx.fillText(desc, boxX + 60, boxY + 385);
-  }
+  currentY += 105;
 
   // Thông tin: Mã băm SHA-256 (File Hash)
-  ctx.font = '500 30px "Be Vietnam Pro", sans-serif';
+  ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#94A3B8";
-  ctx.fillText("Mã băm bất biến SHA-256 (File Hash):", boxX + 60, boxY + 465);
+  ctx.fillText("Mã băm toàn vẹn SHA-256 (File Hash):", boxX + 60, currentY);
 
-  ctx.font = '500 28px "JetBrains Mono", monospace';
+  ctx.font = '500 26px "JetBrains Mono", monospace';
   ctx.fillStyle = "#60A5FA";
-  ctx.fillText(work.fileHash, boxX + 60, boxY + 520);
+  ctx.fillText(work.fileHash, boxX + 60, currentY + 45);
 
-  ctx.font = 'italic 24px "Be Vietnam Pro", sans-serif';
-  ctx.fillStyle = "#64748B";
-  ctx.fillText(
-    "* Mã băm được tính toán trực tiếp từ nội dung nhị phân của file gốc, bảo đảm tính toàn vẹn tuyệt đối.",
-    boxX + 60,
-    boxY + 580
-  );
+  currentY += 105;
+
+  // Thông tin: IPFS Storage CID (nếu có)
+  if (work.ipfsHash) {
+    ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = "#94A3B8";
+    ctx.fillText("Lưu trữ phi tập trung IPFS (CID):", boxX + 60, currentY);
+
+    ctx.font = '500 26px "JetBrains Mono", monospace';
+    ctx.fillStyle = "#F59E0B";
+    ctx.fillText(work.ipfsHash, boxX + 60, currentY + 45);
+
+    currentY += 100;
+  }
+
+  // Thông tin: Mã nhận diện thị giác pHash (nếu có)
+  if (work.pHash) {
+    ctx.font = '500 28px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = "#94A3B8";
+    ctx.fillText("Dấu vân tay thị giác (Perceptual Hash - pHash):", boxX + 60, currentY);
+
+    ctx.font = '500 26px "JetBrains Mono", monospace';
+    ctx.fillStyle = "#A855F7";
+    ctx.fillText(`${work.pHash}  (Chống đạo nhái & biến đổi pixel)`, boxX + 60, currentY + 45);
+
+    currentY += 100;
+  }
+
+  // Mô tả tác phẩm (nếu còn chỗ)
+  const displayDesc = work.cleanDescription || work.description;
+  if (displayDesc && currentY <= boxY + boxH - 60) {
+    ctx.font = '500 26px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = "#94A3B8";
+    ctx.fillText("Ghi chú tác phẩm:", boxX + 60, currentY);
+
+    ctx.font = '400 26px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = "#E2E8F0";
+    const desc = displayDesc.length > 75 ? displayDesc.slice(0, 72) + "..." : displayDesc;
+    ctx.fillText(desc, boxX + 60, currentY + 40);
+  }
 
   // 6. Tạo và vẽ mã QR Code xác minh trực tiếp
   const verifyUrl = `${window.location.origin}/verify/${work.fileHash}`;
@@ -186,25 +213,25 @@ export async function generateCertificatePDF(work) {
   });
 
   // Vẽ hình QR Code ở góc phải
-  const qrX = width - 580;
-  const qrY = height - 440;
-  ctx.drawImage(qrImage, qrX, qrY, 260, 260);
+  const qrX = width - 560;
+  const qrY = height - 420;
+  ctx.drawImage(qrImage, qrX, qrY, 240, 240);
 
   ctx.textAlign = "center";
   ctx.font = '500 22px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#94A3B8";
-  ctx.fillText("Quét mã QR để xác minh", qrX + 130, qrY + 295);
+  ctx.fillText("Quét mã QR để xác minh", qrX + 120, qrY + 275);
 
   // 7. Chân trang (Footer Certificate)
   ctx.textAlign = "left";
   ctx.font = '600 26px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#38BDF8";
-  ctx.fillText("Chứng nhận được xác thực bởi Smart Contract trên Ethereum Sepolia", 200, height - 260);
+  ctx.fillText("Chứng nhận được xác thực bởi Smart Contract trên Ethereum Sepolia & IPFS", 200, height - 250);
 
   ctx.font = '400 22px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#64748B";
-  ctx.fillText("Mã hợp đồng: 0x2b2b19769c2db4595191C2bDE4Ff756397956068", 200, height - 220);
-  ctx.fillText("Bản quyền © CopyrightChain. Tất cả quyền sở hữu được bảo chứng bởi sổ cái phi tập trung.", 200, height - 180);
+  ctx.fillText("Mã hợp đồng: 0x2b2b19769c2db4595191C2bDE4Ff756397956068", 200, height - 210);
+  ctx.fillText("Bản quyền © CopyrightChain. Tất cả quyền sở hữu được bảo chứng bởi sổ cái phi tập trung.", 200, height - 170);
 
   // 8. Chuyển canvas thành file PDF A4 ngang và lưu về máy
   const imgData = canvas.toDataURL("image/png", 1.0);
@@ -218,6 +245,8 @@ export async function generateCertificatePDF(work) {
 
   const cleanTitle = (work.title || "TacPham")
     .replace(/[^a-zA-Z0-9\s-_]/g, "")
+    .trim()
     .replace(/\s+/g, "_");
-  pdf.save(`Chung_Nhan_Ban_Quyen_${cleanTitle}.pdf`);
+
+  pdf.save(`ChungNhan_BanQuyen_${cleanTitle}_${work.fileHash.slice(0, 10)}.pdf`);
 }

@@ -78,7 +78,9 @@ sequenceDiagram
 | **Môi trường Web3** | Hardhat, Hardhat Toolbox | Biên dịch, chạy unit test tự động và triển khai contract |
 | **Mạng Blockchain** | Ethereum Sepolia PoS Testnet | Mạng thử nghiệm chính thức của Ethereum |
 | **Thư viện Web3** | Ethers.js v6 | Tương tác với node RPC và ký giao dịch qua MetaMask |
-| **Mật mã học** | Web Crypto API (`SHA-256`) | Tính toán mã băm client-side nhanh và chuẩn xác |
+| **Mật mã học** | Web Crypto API (`SHA-256`) | Tính toán mã băm client-side nhanh và chuẩn xác (tính toàn vẹn 100%) |
+| **Lưu trữ phi tập trung** | IPFS (Pinata Web3 / CIDv0) | Lưu trữ file tác phẩm vĩnh viễn trên mạng IPFS, cấp mã CID và xem trước |
+| **Chống đạo nhái thị giác** | Perceptual Hash (`dHash 64-bit`) | Phân tích cấu trúc hình học thị giác, phát hiện sửa đổi 1 pixel / nén ảnh qua Hamming Distance |
 | **Frontend UI** | React 18, Vite | Nền tảng xây dựng Single Page Application hiện đại |
 | **Giao diện & CSS** | Tailwind CSS (Dark Mode Fintech) | Thiết kế Glassmorphism, hiệu ứng quầng sáng và lưới vi mô |
 | **Chuyển động** | Framer Motion | Hiệu ứng chuyển cảnh mượt mà, counter số tăng dần |
@@ -109,6 +111,9 @@ CopyrightChain/
 │   │   │   └── WalletContext.jsx       # Quản lý kết nối MetaMask & đổi mạng Sepolia
 │   │   ├── utils/
 │   │   │   ├── hash.js                 # Tính SHA-256 từ file bằng Web Crypto API
+│   │   │   ├── ipfs.js                 # Tải file lên IPFS (Pinata) và tính mã CIDv0
+│   │   │   ├── phash.js                # Tính dHash 64-bit và thuật toán phát hiện đạo nhái
+│   │   │   ├── metadata.js             # Đóng gói và bóc tách IPFS CID & pHash
 │   │   │   ├── contract.js             # Hàm gọi contract (RPC chỉ đọc & Signer)
 │   │   │   ├── format.js               # Định dạng địa chỉ ví, ngày giờ VN, dung lượng
 │   │   │   └── pdf.js                  # Xuất Giấy chứng nhận PDF A4 ngang có mã QR
