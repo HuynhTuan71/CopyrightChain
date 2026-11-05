@@ -25,6 +25,7 @@ import { formatHash, formatTimestamp, copyToClipboard } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
 import { getIPFSGatewayUrl, getLocalPreview } from "../utils/ipfs";
 import TransferModal from "../components/TransferModal";
+import IPFSPreviewModal from "../components/IPFSPreviewModal";
 import { CardSkeleton } from "../components/LoadingSkeleton";
 
 export default function MyWorks() {
@@ -245,17 +246,15 @@ export default function MyWorks() {
                   {/* Badges IPFS & pHash nếu có */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {work.ipfsHash && (
-                      <a
-                        href={getIPFSGatewayUrl(work.ipfsHash)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-[10px] font-semibold text-amber-700 dark:text-amber-300 hover:underline"
-                        title="Xem trên IPFS Gateway"
+                      <button
+                        type="button"
+                        onClick={() => setSelectedIpfsWork(work)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-[10px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition cursor-pointer"
+                        title="Bấm để xem chi tiết ảnh và mã CID trên IPFS"
                       >
                         <Database className="w-3 h-3 text-amber-500" />
                         <span>IPFS: {formatHash(work.ipfsHash, 6, 4)}</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
+                      </button>
                     )}
 
                     {work.pHash && (

@@ -38,6 +38,7 @@ import {
   getEtherscanTxUrl,
 } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
+import IPFSPreviewModal from "../components/IPFSPreviewModal";
 import { uploadToIPFS, getIPFSGatewayUrl } from "../utils/ipfs";
 import {
   isImageFile,
@@ -81,6 +82,7 @@ export default function Register() {
   const [txHash, setTxHash] = useState("");
   const [registeredData, setRegisteredData] = useState(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showIpfsModal, setShowIpfsModal] = useState(false);
 
   // Xử lý kéo thả và tính toán hash + IPFS + pHash
   const processFile = async (selectedFile) => {
@@ -409,15 +411,17 @@ export default function Register() {
                 <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
                   <Database className="w-3.5 h-3.5" /> Mã lưu trữ IPFS (CID):
                 </span>
-                <a
-                  href={getIPFSGatewayUrl(registeredData.ipfsHash)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-mono text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 break-all font-semibold"
+                <button
+                  type="button"
+                  onClick={() => setShowIpfsModal(true)}
+                  className="font-mono text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 break-all font-semibold text-left transition hover:opacity-85"
+                  title="Bấm để xem chi tiết ảnh và CID trên IPFS"
                 >
-                  {formatAddress(registeredData.ipfsHash, 10, 8)}
-                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                </a>
+                  <span>{formatAddress(registeredData.ipfsHash, 10, 8)}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 font-sans font-medium">
+                    Xem chi tiết
+                  </span>
+                </button>
               </div>
             )}
 
@@ -472,6 +476,15 @@ export default function Register() {
               Xem danh sách tác phẩm của tôi <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
+
+          <IPFSPreviewModal
+            isOpen={showIpfsModal}
+            onClose={() => setShowIpfsModal(false)}
+            ipfsHash={registeredData.ipfsHash}
+            title={registeredData.title}
+            isPinnedToNetwork={isPinnedToNetwork}
+            previewUrl={filePreviewUrl}
+          />
         </div>
       </motion.div>
     );

@@ -36,6 +36,7 @@ import {
   getEtherscanAddressUrl,
 } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
+import IPFSPreviewModal from "../components/IPFSPreviewModal";
 import { getIPFSGatewayUrl, getLocalPreview } from "../utils/ipfs";
 import {
   isImageFile,
@@ -53,6 +54,7 @@ export default function Verify() {
   const [isHashing, setIsHashing] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showIpfsModal, setShowIpfsModal] = useState(false);
 
   // Kết quả xác minh: null (chưa tra), 'FOUND' (đã đăng ký), 'NOT_FOUND' (chưa có)
   const [verifyStatus, setVerifyStatus] = useState(null);
@@ -451,14 +453,13 @@ export default function Verify() {
                       <Database className="w-4 h-4 text-amber-600" />
                       Lưu trữ phi tập trung IPFS (CID):
                     </span>
-                    <a
-                      href={getIPFSGatewayUrl(verifiedWork.ipfsHash)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs shadow-sm transition"
+                    <button
+                      type="button"
+                      onClick={() => setShowIpfsModal(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs shadow-sm transition active:scale-95"
                     >
-                      <ExternalLink className="w-3 h-3" /> Xem file trên IPFS
-                    </a>
+                      <Database className="w-3 h-3" /> Xem chi tiết IPFS
+                    </button>
                   </div>
                   <p className="font-mono text-xs text-amber-800 dark:text-amber-300 break-all font-semibold">
                     {verifiedWork.ipfsHash}
@@ -644,6 +645,14 @@ export default function Verify() {
           </div>
         </div>
       </div>
-    </div>
+    
+      <IPFSPreviewModal
+        isOpen={showIpfsModal}
+        onClose={() => setShowIpfsModal(false)}
+        ipfsHash={verifiedWork?.ipfsHash}
+        title={verifiedWork?.title}
+        previewUrl={verifiedWork ? getLocalPreview(verifiedWork.ipfsHash) : null}
+      />
+</div>
   );
 }

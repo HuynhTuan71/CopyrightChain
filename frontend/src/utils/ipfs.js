@@ -55,6 +55,15 @@ export async function calculateClientIpfsCid(input) {
 }
 
 /**
+ * Kiểm tra xem ứng dụng đã được cấu hình Pinata JWT để tải lên IPFS thật hay chưa
+ * @returns {boolean}
+ */
+export function isPinataConfigured() {
+  const pinataJwt = import.meta.env.VITE_PINATA_JWT;
+  return Boolean(pinataJwt && pinataJwt.trim().length > 20);
+}
+
+/**
  * Lấy URL Gateway công khai để xem hoặc tải file từ IPFS
  * @param {string} ipfsHash
  * @returns {string}
@@ -62,12 +71,12 @@ export async function calculateClientIpfsCid(input) {
 export function getIPFSGatewayUrl(ipfsHash) {
   if (!ipfsHash) return "";
   const customGateway = import.meta.env.VITE_PINATA_GATEWAY;
-  if (customGateway) {
+  if (customGateway && !customGateway.includes("gateway.pinata.cloud")) {
     const cleanGw = customGateway.replace(/\/+$/, "");
     return `${cleanGw}/${ipfsHash}`;
   }
-  // Mặc định sử dụng public gateway uy tín
-  return `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+  // Mặc định sử dụng public gateway uy tín không đòi hỏi tài khoản
+  return `https://ipfs.io/ipfs/${ipfsHash}`;
 }
 
 /**
@@ -115,11 +124,19 @@ export async function uploadToIPFS(file, onProgress) {
 
   // 2. Tạo Preview Data URL nếu là file ảnh để hiển thị ngay
   if (file.type.startsWith("image/")) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      cacheLocalPreview(clientCid, reader.result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+      if (dataUrl) {
+        cacheLocalPreview(clientCid, dataUrl);
+      }
+    } catch (e) {
+      console.warn("Lỗi tạo preview ảnh cache:", e);
+    }
   }
 
   // 3. Kiểm tra xem có cấu hình Pinata JWT hay không
