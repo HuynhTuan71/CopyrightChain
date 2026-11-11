@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
 import MyWorks from "./pages/MyWorks";
+import CertificatePreview from "./pages/CertificatePreview";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/verify" element={<Verify />} />
           <Route path="/verify/:hash" element={<Verify />} />
           <Route path="/my-works" element={<MyWorks />} />
+          <Route path="/cert-preview" element={<CertificatePreview />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
