@@ -10,7 +10,6 @@ import {
   Cpu,
   Database,
   ArrowRight,
-  Sparkles,
   Layers,
   Clock,
   Share2,
@@ -50,12 +49,6 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-7 space-y-4 sm:space-y-6 text-left"
           >
-            {/* Tag nhỏ trên đầu */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#38BDF8] text-[11px] sm:text-xs font-semibold leading-normal max-w-full">
-              <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="truncate sm:whitespace-normal">Chuẩn băm SHA-256 & Smart Contract Sepolia</span>
-            </div>
-
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight sm:leading-[1.15] text-slate-900 dark:text-white">
               Bảo vệ bản quyền <br className="hidden sm:inline" />
               <span className="text-gradient">tác phẩm số của bạn</span> <br className="hidden sm:inline" />
