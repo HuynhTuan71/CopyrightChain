@@ -49,9 +49,9 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-7 space-y-4 sm:space-y-6 text-left"
           >
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight sm:leading-[1.15] text-slate-900 dark:text-white">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-normal leading-[1.3] sm:leading-[1.3] lg:leading-[1.28] text-slate-900 dark:text-white">
               Bảo vệ bản quyền <br className="hidden sm:inline" />
-              <span className="text-gradient">tác phẩm số của bạn</span> <br className="hidden sm:inline" />
+              <span className="text-gradient inline-block my-0.5 sm:my-1">tác phẩm số của bạn</span> <br className="hidden sm:inline" />
               trên Blockchain
             </h1>
 
