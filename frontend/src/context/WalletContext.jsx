@@ -69,7 +69,11 @@ export const WalletProvider = ({ children }) => {
           return false;
         }
       }
-      if (switchError.code === 4001) {
+      if (
+        switchError.code === 4001 ||
+        switchError.code === "ACTION_REJECTED" ||
+        switchError.info?.error?.code === 4001
+      ) {
         toast.error("Bạn đã từ chối chuyển mạng.");
       } else {
         toast.error("Lỗi khi chuyển mạng sang Sepolia.");
@@ -151,8 +155,12 @@ export const WalletProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Lỗi kết nối ví:", error);
-      if (error.code === 4001) {
-        toast.error("Bạn đã huỷ yêu cầu kết nối ví.");
+      if (
+        error.code === 4001 ||
+        error.code === "ACTION_REJECTED" ||
+        error.info?.error?.code === 4001
+      ) {
+        toast.error("Bạn đã huỷ yêu cầu kết nối ví trên MetaMask.");
       } else {
         toast.error(error.message || "Không thể kết nối ví MetaMask.");
       }

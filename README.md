@@ -13,6 +13,7 @@
 6. [Hướng dẫn cài đặt & Cấu hình .env](#-6-hướng-dẫn-cài-đặt--cấu-hình-env)
 7. [Chạy kiểm thử & Triển khai Smart Contract](#-7-chạy-kiểm-thử--triển-khai-smart-contract)
 8. [Khởi chạy Giao diện Frontend](#-8-khởi-chạy-giao-diện-frontend)
+9. [Phân công nhiệm vụ](#-9-phân-công-nhiệm-vụ)
 ---
 
 ## 💡 1. Giới thiệu & Ý tưởng hệ thống
@@ -240,3 +241,19 @@ Nếu muốn kiểm tra bản build đóng gói sản phẩm:
 npm run build
 npm run preview
 ```
+
+---
+
+## 👥 9. Phân công nhiệm vụ
+
+| STT | Phân hệ / Nhiệm vụ | Thành viên phụ trách | Trách nhiệm chính | Mức độ hoàn thành |
+| :-: | :--- | :--- | :--- | :-: |
+| 1 | **Smart Contract & Unit Tests** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Xây dựng hợp đồng `CopyrightRegistry.sol`, thuật toán swap-and-pop, 19 bài test tự động và script deploy | 100% |
+| 2 | **Bảo mật SHA-256 Client-side** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Tích hợp Web Crypto API băm file trên RAM máy khách, bảo mật file gốc tuyệt đối | 100% |
+| 3 | **Giao diện Frontend & UI/UX** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Xây dựng toàn bộ giao diện React + Vite + Tailwind, bộ màu CTUET, Dark/Light Mode, Navbar, Footer, Trang chủ | 100% |
+| 4 | **Responsive Mobile & Typography** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Tối ưu hiển thị điện thoại, Sidebar Drawer bằng React `createPortal`, căn chỉnh khoảng cách chữ tiếng Việt | 100% |
+| 5 | **Lưu trữ phi tập trung IPFS** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Tích hợp Pinata API, upload & ghim file, tính mã băm CIDv0, modal xem trước trên IPFS Gateway | 100% |
+| 6 | **Chống đạo nhái thị giác (pHash)** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Phát triển thuật toán Perceptual Hash 64-bit, tính khoảng cách Hamming, phát hiện sửa 1 pixel ảnh | 100% |
+| 7 | **Xuất chứng chỉ & Định tuyến** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Trang xem trước chứng chỉ `/cert-preview`, xuất file PDF Giấy chứng nhận có QR code, cấu hình `_redirects` cho Render | 100% |
+| 8 | **Dữ liệu & Kịch bản kiểm thử** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Chuẩn bị dữ liệu mẫu trong `demo-files/` và kịch bản demo báo cáo hệ thống | 100% |
+

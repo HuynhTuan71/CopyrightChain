@@ -81,7 +81,12 @@ export default function TransferModal({ isOpen, onClose, work, signer, currentAc
     } catch (err) {
       console.error("Lỗi khi chuyển quyền sở hữu:", err);
       let errorMsg = "Giao dịch chuyển nhượng thất bại.";
-      if (err.code === 4001 || err.action === "sendTransaction") {
+      if (
+        err.code === 4001 ||
+        err.code === "ACTION_REJECTED" ||
+        err.info?.error?.code === 4001 ||
+        err.action === "sendTransaction"
+      ) {
         errorMsg = "Bạn đã từ chối ký giao dịch.";
       } else if (err.reason) {
         errorMsg = err.reason;
