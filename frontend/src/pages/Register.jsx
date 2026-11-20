@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import {
   UploadCloud,
@@ -19,8 +19,8 @@ import {
   Fingerprint,
   Image as ImageIcon,
   ShieldAlert,
-  Sparkles,
-  Info,
+  Eye,
+  Ban,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useWallet } from "../context/WalletContext";
@@ -29,7 +29,7 @@ import {
   checkIsRegistered,
   fetchWork,
   getSignerContract,
-  fetchAllKnownWorks,
+  findSimilarWorkOnChain,
 } from "../utils/contract";
 import {
   formatAddress,
@@ -39,16 +39,17 @@ import {
 } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
 import IPFSPreviewModal from "../components/IPFSPreviewModal";
-import { uploadToIPFS, getIPFSGatewayUrl } from "../utils/ipfs";
+import { uploadToIPFS } from "../utils/ipfs";
 import {
   isImageFile,
   calculateDHash,
-  checkVisualPlagiarism,
+  normalizePHashBytes8,
+  MEDIUM_SIMILAR_HAMMING_DISTANCE,
 } from "../utils/phash";
-import { encodeDescriptionWithMetadata } from "../utils/metadata";
+import { getUtf8ByteLength, truncateToUtf8Bytes } from "../utils/metadata";
 
 export default function Register() {
-  const { account, signer, connectWallet } = useWallet();
+  const { account, signer, isCorrectNetwork, connectWallet, switchToSepolia } = useWallet();
 
   // Trạng thái file & form
   const [file, setFile] = useState(null);
@@ -68,7 +69,7 @@ export default function Register() {
   const [isPinnedToNetwork, setIsPinnedToNetwork] = useState(false);
   const [filePreviewUrl, setFilePreviewUrl] = useState(null);
 
-  // NÂNG CẤP 4: Perceptual Hash (pHash) & Chống đạo nhái thị giác
+  // NÂNG CẤP 4: Perceptual Hash (dHash 64-bit) & Chống đạo nhái thị giác On-Chain
   const [isAnalyzingPHash, setIsAnalyzingPHash] = useState(false);
   const [pHashData, setPHashData] = useState(null);
   const [plagiarismWarning, setPlagiarismWarning] = useState(null);
@@ -84,7 +85,20 @@ export default function Register() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showIpfsModal, setShowIpfsModal] = useState(false);
 
-  // Xử lý kéo thả và tính toán hash + IPFS + pHash
+  const titleBytes = getUtf8ByteLength(title.trim());
+  const descBytes = getUtf8ByteLength(description.trim());
+  const isBlockedByPlagiarism = Boolean(plagiarismWarning?.hasPlagiarismRisk);
+
+  // Giải phóng Object URL ảnh preview khi thay đổi hoặc unmount
+  useEffect(() => {
+    return () => {
+      if (filePreviewUrl && filePreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(filePreviewUrl);
+      }
+    };
+  }, [filePreviewUrl]);
+
+  // Xử lý kéo thả và tính toán hash + pHash + kiểm tra trùng lặp / đạo nhái On-Chain
   const processFile = async (selectedFile) => {
     if (!selectedFile) return;
 
@@ -116,10 +130,10 @@ export default function Register() {
       setFilePreviewUrl(null);
     }
 
-    // Tự động gợi ý tên tác phẩm từ tên file (bỏ đuôi mở rộng)
+    // Tự động gợi ý tên tác phẩm từ tên file (cắt đúng giới hạn <= 100 byte UTF-8)
     if (!title) {
       const suggestedName = selectedFile.name.replace(/\.[^/.]+$/, "");
-      setTitle(suggestedName.slice(0, 100));
+      setTitle(truncateToUtf8Bytes(suggestedName, 100));
     }
 
     try {
@@ -134,37 +148,47 @@ export default function Register() {
         const existing = await fetchWork(hash);
         setDuplicateWork(existing);
         toast.error("Tác phẩm này đã được đăng ký trên Blockchain từ trước!", { duration: 5000 });
-      } else {
-        toast.success("Đã tính mã băm SHA-256 thành công.");
       }
 
-      // 3. NÂNG CẤP 4: Phân tích Perceptual Hash (dHash 64-bit) nếu là file hình ảnh
+      // 3. Phân tích Perceptual Hash (dHash 64-bit) & truy vấn On-Chain nếu là hình ảnh
       if (isImageFile(selectedFile)) {
         setIsAnalyzingPHash(true);
         try {
           const phashResult = await calculateDHash(selectedFile);
           setPHashData(phashResult);
 
-          // Quét đối chiếu với các tác phẩm đã biết trên hệ thống
-          const knownWorks = await fetchAllKnownWorks();
-          const plagResult = checkVisualPlagiarism(phashResult.dHash, knownWorks, hash);
-
-          if (plagResult.hasPlagiarismRisk) {
-            setPlagiarismWarning(plagResult);
-            toast(
-              `CẢNH BÁO ĐẠO NHÁI: Tương đồng ${plagResult.highestSimilarity}% với tác phẩm đã đăng ký!`,
-              {
-                icon: "⚠️",
-                duration: 6000,
-                style: { background: "#FEF3C7", color: "#92400E", border: "1px solid #F59E0B" },
-              }
+          if (!isReg) {
+            // Truy vấn trực tiếp Smart Contract findSimilarWork() (không phụ thuộc localStorage/logs)
+            const plagResult = await findSimilarWorkOnChain(
+              phashResult.dHash,
+              MEDIUM_SIMILAR_HAMMING_DISTANCE,
+              hash
             );
+
+            if (plagResult.hasPlagiarismRisk) {
+              setPlagiarismWarning(plagResult);
+              toast.error(
+                `CHẶN ĐĂNG KÝ: Phát hiện ảnh tương đồng ${plagResult.highestSimilarity}% với tác phẩm đã có bản quyền!`,
+                { duration: 6000 }
+              );
+            } else if (plagResult.hasModerateSimilarity) {
+              setPlagiarismWarning(plagResult);
+              toast(
+                `Lưu ý: Ảnh có độ tương đồng ${plagResult.highestSimilarity}% với một tác phẩm đã đăng ký.`,
+                { icon: "ℹ️", duration: 5000 }
+              );
+            } else {
+              toast.success("Đã tính SHA-256 & pHash 64-bit thành công. Ảnh hợp lệ!");
+            }
           }
         } catch (phashErr) {
           console.warn("Lỗi khi phân tích pHash ảnh:", phashErr);
+          if (!isReg) toast.success("Đã tính mã băm SHA-256 thành công.");
         } finally {
           setIsAnalyzingPHash(false);
         }
+      } else if (!isReg) {
+        toast.success("Đã tính mã băm SHA-256 thành công.");
       }
     } catch (err) {
       console.error("Lỗi khi xử lý file:", err);
@@ -202,6 +226,12 @@ export default function Register() {
       return;
     }
 
+    if (!isCorrectNetwork) {
+      toast.error("Vui lòng chuyển ví sang đúng mạng Blockchain trước khi đăng ký!");
+      await switchToSepolia();
+      return;
+    }
+
     if (!fileHash) {
       toast.error("Vui lòng chọn file tác phẩm để tính toán mã SHA-256!");
       return;
@@ -212,8 +242,25 @@ export default function Register() {
       return;
     }
 
+    if (titleBytes > 100) {
+      toast.error("Tiêu đề vượt quá giới hạn 100 byte UTF-8 của Smart Contract!");
+      return;
+    }
+
+    if (descBytes > 500) {
+      toast.error("Mô tả vượt quá giới hạn 500 byte UTF-8 của Smart Contract!");
+      return;
+    }
+
     if (duplicateWork) {
       toast.error("Tác phẩm này đã có trên hệ thống, không thể đăng ký lại!");
+      return;
+    }
+
+    if (isBlockedByPlagiarism) {
+      toast.error(
+        `Không thể đăng ký: Ảnh bị phát hiện tương đồng ${plagiarismWarning.highestSimilarity}% với tác phẩm đã có bản quyền!`
+      );
       return;
     }
 
@@ -245,23 +292,24 @@ export default function Register() {
 
     try {
       const contract = getSignerContract(signer);
+      const pHashBytes8 = normalizePHashBytes8(pHashData?.dHash);
 
-      // Đóng gói mô tả kèm Metadata (IPFS Hash + pHash) vào description (chuẩn hóa <= 500 byte)
-      const packedDescription = encodeDescriptionWithMetadata(description.trim(), {
-        ipfsHash: finalIpfsCid,
-        pHash: pHashData?.dHash || "",
-      });
-
-      // Gửi giao dịch lên Ethereum Sepolia
-      const tx = await contract.registerWork(fileHash, title.trim(), packedDescription);
+      // Gửi giao dịch lên Smart Contract (truyền trực tiếp ipfsCid và bytes8 pHash)
+      const tx = await contract.registerWork(
+        fileHash,
+        title.trim(),
+        description.trim(),
+        finalIpfsCid || "",
+        pHashBytes8
+      );
 
       setTxStep(2); // Bước 2: Đang xác nhận khối
       setTxHash(tx.hash);
-      toast.loading("Đang chờ mạng Sepolia xác nhận khối...", { id: "register-tx" });
+      toast.loading("Đang chờ mạng Blockchain xác nhận khối...", { id: "register-tx" });
 
       await tx.wait(1);
 
-      // Lấy dữ liệu vừa đăng ký
+      // Lấy dữ liệu vừa đăng ký từ Smart Contract
       const newlyRegistered = await fetchWork(fileHash);
       setRegisteredData(
         newlyRegistered || {
@@ -269,7 +317,8 @@ export default function Register() {
           title: title.trim(),
           description: description.trim(),
           cleanDescription: description.trim(),
-          ipfsHash: finalIpfsCid,
+          ipfsCid: finalIpfsCid || "",
+          ipfsHash: finalIpfsCid || "",
           pHash: pHashData?.dHash || "",
           owner: account,
           timestamp: Math.floor(Date.now() / 1000),
@@ -279,7 +328,6 @@ export default function Register() {
       setTxStep(3); // Bước 3: Hoàn tất
       toast.success("Đăng ký bản quyền tác phẩm thành công!", { id: "register-tx" });
 
-      // Hiệu ứng pháo hoa chúc mừng
       confetti({
         particleCount: 120,
         spread: 80,
@@ -290,17 +338,23 @@ export default function Register() {
       setTxStep(0);
 
       let errorMsg = "Giao dịch đăng ký thất bại.";
+      const rawReason = err.reason || err.shortMessage || err.message || "";
       if (
         err.code === 4001 ||
         err.code === "ACTION_REJECTED" ||
-        err.info?.error?.code === 4001 ||
-        err.action === "sendTransaction"
+        err.info?.error?.code === 4001
       ) {
         errorMsg = "Bạn đã từ chối ký giao dịch trên MetaMask.";
+      } else if (rawReason.includes("Phat hien anh trung dau van tay thi giac pHash")) {
+        errorMsg = "Smart Contract từ chối: Ảnh trùng dấu vân tay thị giác (pHash) với tác phẩm đã đăng ký!";
+      } else if (rawReason.includes("Phat hien anh tuong dong cao")) {
+        errorMsg = "Smart Contract từ chối: Ảnh có độ tương đồng thị giác ≥ 85.9% với tác phẩm đã đăng ký!";
+      } else if (rawReason.includes("Tac pham da duoc dang ky")) {
+        errorMsg = "Smart Contract từ chối: Tác phẩm (SHA-256) đã được đăng ký trước đó!";
       } else if (err.reason) {
         errorMsg = err.reason;
       }
-      toast.error(errorMsg, { id: "register-tx" });
+      toast.error(errorMsg, { id: "register-tx", duration: 6000 });
     }
   };
 
@@ -501,13 +555,13 @@ export default function Register() {
       <div className="text-center space-y-2 sm:space-y-3 px-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-[#0066CC]/15 border border-blue-200 dark:border-[#0066CC]/35 text-[#0066CC] dark:text-[#38BDF8] text-[11px] sm:text-xs font-semibold">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Ghi nhận quyền tác giả On-Chain & IPFS Storage</span>
+          <span>Ghi nhận quyền tác giả On-Chain & Chống Đạo Nhái pHash</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
           Đăng Ký Bản Quyền Tác Phẩm
         </h1>
         <p className="text-xs sm:text-base text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
-          Tính toán mã băm SHA-256 và Perceptual Hash (chống đạo nhái) trực tiếp trên trình duyệt, lưu trữ file lên IPFS và ghi nhận bất biến trên Ethereum Sepolia.
+          Tính toán mã băm SHA-256 và dấu vân tay thị giác pHash 64-bit (cấu trúc độ sáng + màu sắc YCbCr) trực tiếp trên trình duyệt, đối chiếu đạo nhái On-Chain và ghi nhận bất biến trên Ethereum Sepolia.
         </p>
       </div>
 
@@ -543,7 +597,7 @@ export default function Register() {
 
             <div className="flex flex-col items-center justify-center space-y-2.5">
               <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-[#003399]/20 border border-blue-200 dark:border-[#003399]/40 text-[#0052CC] dark:text-[#38BDF8] flex items-center justify-center">
-                {isHashing || isAnalyzingPHash ? (
+                {isHashing || isAnalyzingPHash || isCheckingDuplicate ? (
                   <Loader2 className="w-6 h-6 animate-spin text-[#0066CC] dark:text-[#38BDF8]" />
                 ) : (
                   <UploadCloud className="w-6 h-6" />
@@ -553,15 +607,17 @@ export default function Register() {
               <div>
                 <p className="text-sm font-semibold text-slate-800 dark:text-white">
                   {isHashing
-                    ? "Đang tính toán mã băm SHA-256..."
+                    ? `Đang tính toán mã băm SHA-256 (${hashProgress}%)...`
+                    : isCheckingDuplicate
+                    ? "Đang kiểm tra trùng lặp SHA-256 trên Blockchain..."
                     : isAnalyzingPHash
-                    ? "Đang phân tích dấu vân tay thị giác pHash..."
+                    ? "Đang phân tích pHash 64-bit & quét chống đạo nhái On-Chain..."
                     : file
                     ? "Bấm để đổi file khác"
                     : "Kéo thả file tác phẩm vào đây hoặc bấm để chọn"}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Đảm bảo quyền riêng tư: File chỉ đọc nhị phân trong RAM máy bạn để lấy mã băm
+                  Trình duyệt băm SHA-256 & pHash ngay trong RAM; chỉ lưu lên IPFS (Pinata) nếu bật tuỳ chọn bên dưới
                 </p>
               </div>
 
@@ -575,7 +631,7 @@ export default function Register() {
 
                   {isImageFile(file) && (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-semibold">
-                      <ImageIcon className="w-3 h-3" /> Định dạng Hình ảnh
+                      <ImageIcon className="w-3 h-3" /> Định dạng Hình ảnh (pHash On-Chain)
                     </span>
                   )}
                 </div>
@@ -584,7 +640,7 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Khung hiển thị Hash SHA-256 & pHash */}
+        {/* Khung hiển thị Hash SHA-256 & dHash */}
         {fileHash && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 animate-in fade-in">
             {/* SHA-256 */}
@@ -635,35 +691,73 @@ export default function Register() {
           </div>
         )}
 
-        {/* NÂNG CẤP 4: CẢNH BÁO ĐẠO NHÁI THỊ GIÁC (PERCEPTUAL HASH) */}
+        {/* CHẶN ĐĂNG KÝ: CẢNH BÁO ĐẠO NHÁI THỊ GIÁC (CRITICAL / HIGH >= 85.9%) */}
         {plagiarismWarning && plagiarismWarning.hasPlagiarismRisk && (
-          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 dark:border-amber-500 text-xs space-y-3 animate-in fade-in shadow-md">
-            <div className="flex items-center gap-2 font-bold text-sm text-amber-800 dark:text-amber-200">
-              <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span>
-                CẢNH BÁO ĐẠO NHÁI THỊ GIÁC (Tương đồng {plagiarismWarning.highestSimilarity}%)
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-500 text-xs space-y-3 animate-in fade-in shadow-md">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 font-bold text-sm text-amber-800 dark:text-amber-200">
+                <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <span>
+                  CHẶN ĐĂNG KÝ: PHÁT HIỆN ẢNH CHỈNH SỬA / ĐẠO NHÁI ({plagiarismWarning.highestSimilarity}%)
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 font-mono font-bold text-[11px]">
+                Khác {plagiarismWarning.hammingDistance}/64 bit
               </span>
             </div>
+
             <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
-              Thuật toán Perceptual Hash phát hiện bức tranh này có cấu trúc thị giác tương đồng{" "}
+              Thuật toán <strong>pHash 64-bit On-Chain</strong> phát hiện bức ảnh này có cấu trúc thị giác tương đồng{" "}
               <strong className="text-amber-700 dark:text-amber-300">
                 {plagiarismWarning.highestSimilarity}%
               </strong>{" "}
-              với một tác phẩm đã được đăng ký trước đó:
+              với một tác phẩm đã đăng ký bản quyền trước đó:
             </p>
+
             {plagiarismWarning.matchedWork && (
-              <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-amber-300 dark:border-amber-700/50 space-y-1">
-                <div className="font-bold text-slate-900 dark:text-white">
+              <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-amber-300 dark:border-amber-700/50 space-y-1.5">
+                <div className="font-bold text-sm text-slate-900 dark:text-white">
                   "{plagiarismWarning.matchedWork.title}"
                 </div>
-                <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all">
                   Tác giả gốc: {plagiarismWarning.matchedWork.owner}
+                </div>
+                <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400">
+                  pHash gốc: {plagiarismWarning.matchedWork.pHash}
+                </div>
+                <div className="pt-1">
+                  <Link
+                    to={`/verify/${plagiarismWarning.matchedWork.fileHash}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs transition"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Xem tác phẩm gốc trên Blockchain
+                  </Link>
                 </div>
               </div>
             )}
-            <p className="text-[11px] text-amber-700 dark:text-amber-400 italic">
-              * Ngay cả khi bức ảnh bị sửa đổi 1 vài pixel, đổi độ sáng hoặc nén lại, thuật toán pHash vẫn nhận diện được sự tương đồng để bảo vệ bản quyền tác giả ban đầu.
+
+            <p className="text-[11px] text-rose-700 dark:text-rose-300 font-medium">
+              * Hệ thống và Smart Contract đều từ chối đăng ký ảnh có độ tương đồng ≥ 85.9% (≤ 9/64 bit khác biệt) nhằm ngăn chặn hành vi sửa vài pixel, nén ảnh hoặc chỉnh màu để đăng ký lại.
             </p>
+          </div>
+        )}
+
+        {/* THÔNG BÁO MỨC TRUNG BÌNH (78.1% - 84.4%) — CHỈ CẢNH BÁO THAM KHẢO */}
+        {plagiarismWarning && !plagiarismWarning.hasPlagiarismRisk && plagiarismWarning.hasModerateSimilarity && (
+          <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-300 dark:border-blue-700/50 text-xs space-y-2 animate-in fade-in">
+            <div className="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-200">
+              <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span>
+                Lưu ý tương đồng mức trung bình ({plagiarismWarning.highestSimilarity}% — khác {plagiarismWarning.hammingDistance}/64 bit)
+              </span>
+            </div>
+            {plagiarismWarning.matchedWork && (
+              <p className="text-slate-600 dark:text-slate-300">
+                Ảnh có một số nét bố cục gần với tác phẩm{" "}
+                <strong className="text-slate-900 dark:text-white">"{plagiarismWarning.matchedWork.title}"</strong>{" "}
+                nhưng nằm dưới ngưỡng chặn 85.9% nên bạn vẫn có thể đăng ký nếu đây là tác phẩm độc lập của bạn.
+              </p>
+            )}
           </div>
         )}
 
@@ -678,7 +772,7 @@ export default function Register() {
               Mã băm SHA-256 của file này trùng khớp 100% với tác phẩm:{" "}
               <strong className="text-slate-900 dark:text-white">"{duplicateWork.title}"</strong>.
             </p>
-            <p className="font-mono text-[11px] text-rose-700 dark:text-rose-400">
+            <p className="font-mono text-[11px] text-rose-700 dark:text-rose-400 break-all">
               Chủ sở hữu hiện tại: {duplicateWork.owner}
             </p>
             <p className="text-slate-500 dark:text-slate-400">
@@ -695,22 +789,30 @@ export default function Register() {
                 Tên tác phẩm <span className="text-rose-500">*</span>
               </label>
               <span
-                className={`text-xs ${
-                  title.length > 90 ? "text-amber-500" : "text-slate-500"
+                className={`text-xs font-mono ${
+                  titleBytes > 100
+                    ? "text-rose-500 font-bold"
+                    : titleBytes > 85
+                    ? "text-amber-500"
+                    : "text-slate-500"
                 }`}
               >
-                {title.length}/100 ký tự
+                {titleBytes}/100 byte UTF-8
               </span>
             </div>
             <input
               type="text"
-              maxLength={100}
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ví dụ: Bức tranh kỹ thuật số Hoàng Hôn Cyberpunk"
               className="w-full glass-input px-4 py-3 rounded-xl text-sm placeholder:text-slate-400"
             />
+            {titleBytes > 100 && (
+              <p className="text-xs text-rose-500 mt-1">
+                Tiêu đề tiếng Việt có dấu chiếm nhiều byte UTF-8 hơn số ký tự. Vui lòng rút gọn xuống ≤ 100 byte.
+              </p>
+            )}
           </div>
 
           <div>
@@ -719,21 +821,29 @@ export default function Register() {
                 Mô tả chi tiết tác phẩm <span className="text-slate-500 text-xs">(Tùy chọn)</span>
               </label>
               <span
-                className={`text-xs ${
-                  description.length > 380 ? "text-amber-500" : "text-slate-500"
+                className={`text-xs font-mono ${
+                  descBytes > 500
+                    ? "text-rose-500 font-bold"
+                    : descBytes > 450
+                    ? "text-amber-500"
+                    : "text-slate-500"
                 }`}
               >
-                {description.length}/400 ký tự
+                {descBytes}/500 byte UTF-8
               </span>
             </div>
             <textarea
               rows={3}
-              maxLength={400}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Thông tin thêm về công cụ sáng tác, bối cảnh, phiên bản hoặc thông điệp của tác phẩm..."
               className="w-full glass-input px-4 py-3 rounded-xl text-sm placeholder:text-slate-400 resize-none"
             />
+            {descBytes > 500 && (
+              <p className="text-xs text-rose-500 mt-1">
+                Mô tả vượt quá 500 byte UTF-8. Vui lòng rút gọn lại.
+              </p>
+            )}
           </div>
         </div>
 
@@ -749,7 +859,7 @@ export default function Register() {
                   Lưu trữ phi tập trung IPFS (Pinata Web3)
                 </span>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Lưu trữ vĩnh viễn file trên mạng IPFS, cấp mã CID và xem trước trực tuyến
+                  Lưu trữ vĩnh viễn file trên mạng IPFS, cấp mã CID và ghi trực tiếp vào Smart Contract
                 </p>
               </div>
             </div>
@@ -777,7 +887,7 @@ export default function Register() {
                   Hình ảnh xem trước sẵn sàng
                 </span>
                 <p className="text-[11px] text-slate-400">
-                  File sẽ được đính kèm mã IPFS CID khi ghi vào Smart Contract
+                  File sẽ được đính kèm mã IPFS CID và dấu vân tay pHash khi ghi vào Smart Contract
                 </p>
               </div>
             </div>
@@ -836,7 +946,19 @@ export default function Register() {
         {/* NÚT SUBMIT */}
         <button
           type="submit"
-          disabled={!fileHash || !!duplicateWork || isHashing || txStep > 0 || isUploadingIPFS}
+          disabled={
+            !fileHash ||
+            !!duplicateWork ||
+            isBlockedByPlagiarism ||
+            isHashing ||
+            isAnalyzingPHash ||
+            isCheckingDuplicate ||
+            txStep > 0 ||
+            isUploadingIPFS ||
+            titleBytes === 0 ||
+            titleBytes > 100 ||
+            descBytes > 500
+          }
           className="w-full py-4 rounded-2xl btn-primary font-bold text-base shadow-sm flex items-center justify-center gap-2.5 transition active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isUploadingIPFS ? (
@@ -848,6 +970,16 @@ export default function Register() {
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
               <span>Đang xử lý giao dịch Blockchain...</span>
+            </>
+          ) : duplicateWork ? (
+            <>
+              <Ban className="w-5 h-5" />
+              <span>Đã bị chặn: Trùng mã SHA-256</span>
+            </>
+          ) : isBlockedByPlagiarism ? (
+            <>
+              <Ban className="w-5 h-5" />
+              <span>Đã bị chặn: Ảnh tương đồng {plagiarismWarning.highestSimilarity}% với bản gốc</span>
             </>
           ) : (
             <>

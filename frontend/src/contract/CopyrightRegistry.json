@@ -1,5 +1,5 @@
 {
-  "address": "0x2b2b19769c2db4595191C2bDE4Ff756397956068",
+  "address": "0xfb11949FfF68417dC959F85d5E16846685541c7c",
   "abi": [
     {
       "anonymous": false,
@@ -49,6 +49,18 @@
         },
         {
           "indexed": false,
+          "internalType": "string",
+          "name": "ipfsCid",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes8",
+          "name": "pHash",
+          "type": "bytes8"
+        },
+        {
+          "indexed": false,
           "internalType": "uint256",
           "name": "timestamp",
           "type": "uint256"
@@ -56,6 +68,66 @@
       ],
       "name": "WorkRegistered",
       "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_SIMILAR_HAMMING_DISTANCE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes8",
+          "name": "targetPHash",
+          "type": "bytes8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "maxDistance",
+          "type": "uint8"
+        }
+      ],
+      "name": "findSimilarWork",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "found",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "matchedFileHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "minDistance",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllWorkHashes",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -88,6 +160,16 @@
               "internalType": "string",
               "name": "description",
               "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ipfsCid",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes8",
+              "name": "pHash",
+              "type": "bytes8"
             },
             {
               "internalType": "uint256",
@@ -125,6 +207,91 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "offset",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "getWorksPaginated",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "fileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ipfsCid",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes8",
+              "name": "pHash",
+              "type": "bytes8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct CopyrightRegistry.Work[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "a",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "b",
+          "type": "uint64"
+        }
+      ],
+      "name": "hammingDistance64",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "bytes32",
           "name": "fileHash",
           "type": "bytes32"
@@ -157,11 +324,34 @@
           "internalType": "string",
           "name": "description",
           "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsCid",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes8",
+          "name": "pHash",
+          "type": "bytes8"
         }
       ],
       "name": "registerWork",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalImageWorks",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -198,5 +388,5 @@
   ],
   "chainId": 11155111,
   "networkName": "sepolia",
-  "deployedAt": "2026-11-01T08:17:12.720Z"
+  "deployedAt": "2026-11-20T08:16:00.996Z"
 }

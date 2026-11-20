@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import { TARGET_CHAIN_ID, TARGET_CHAIN_ID_HEX } from "../utils/contract";
@@ -7,11 +7,16 @@ const WalletContext = createContext(null);
 
 export const WalletProvider = ({ children }) => {
   const [account, setAccount] = useState("");
+  const accountRef = useRef("");
   const [chainId, setChainId] = useState(null);
   const [balance, setBalance] = useState("0");
   const [isConnecting, setIsConnecting] = useState(false);
   const [signer, setSigner] = useState(null);
   const [provider, setProvider] = useState(null);
+
+  useEffect(() => {
+    accountRef.current = account;
+  }, [account]);
 
   const isCorrectNetwork = Number(chainId) === TARGET_CHAIN_ID;
 
@@ -249,9 +254,10 @@ export const WalletProvider = ({ children }) => {
       setChainId(parsedChainId);
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
       setProvider(browserProvider);
-      if (account) {
-        browserProvider.getSigner().then(setSigner);
-        updateBalance(account, browserProvider);
+      const currentAccount = accountRef.current;
+      if (currentAccount) {
+        browserProvider.getSigner().then(setSigner).catch(() => {});
+        updateBalance(currentAccount, browserProvider);
       }
     };
 

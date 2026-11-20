@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
-import { formatTimestamp, formatAddress } from "./format";
+import { formatTimestamp } from "./format";
+import { CONTRACT_ADDRESS } from "./contract";
 
 /**
  * Vẽ Giấy chứng nhận bản quyền lên Canvas độ phân giải cao
@@ -216,7 +217,7 @@ export async function renderCertificateCanvas(work) {
 
   ctx.font = '400 22px "Be Vietnam Pro", sans-serif';
   ctx.fillStyle = "#64748B";
-  ctx.fillText("Mã hợp đồng: 0x2b2b19769c2db4595191C2bDE4Ff756397956068", 200, height - 210);
+  ctx.fillText(`Mã hợp đồng: ${CONTRACT_ADDRESS}`, 200, height - 210);
   ctx.fillText("Bản quyền © CopyrightChain. Tất cả quyền sở hữu được bảo chứng bởi sổ cái phi tập trung.", 200, height - 170);
 
   return canvas;

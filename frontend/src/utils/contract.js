@@ -1,16 +1,40 @@
 import { ethers } from "ethers";
 import contractConfig from "../contract/CopyrightRegistry.json";
 import { parseWorkMetadata } from "./metadata";
+import {
+  isNonZeroPHash,
+  normalizePHashBytes8,
+  evaluatePlagiarismFromDistance,
+  checkVisualPlagiarism,
+  MEDIUM_SIMILAR_HAMMING_DISTANCE,
+} from "./phash";
 
 export const CONTRACT_ADDRESS = contractConfig.address;
 export const CONTRACT_ABI = contractConfig.abi;
-export const TARGET_CHAIN_ID = 11155111; // Ethereum Sepolia Testnet
-export const TARGET_CHAIN_ID_HEX = "0xaa36a7";
+export const TARGET_CHAIN_ID = Number(contractConfig.chainId) || 11155111;
+export const TARGET_CHAIN_ID_HEX = `0x${TARGET_CHAIN_ID.toString(16)}`;
+export const TARGET_NETWORK_NAME = contractConfig.networkName || "sepolia";
 
 // URL RPC công khai dự phòng để đọc dữ liệu khi người dùng chưa cài hoặc chưa kết nối ví
 const PUBLIC_RPC_URL =
-  import.meta.env.VITE_RPC_URL ||
-  "https://ethereum-sepolia-rpc.publicnode.com";
+  TARGET_CHAIN_ID === 31337
+    ? "http://127.0.0.1:8545"
+    : import.meta.env.VITE_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+
+/**
+ * Chuyển đổi struct Work trả về từ Ethers v6 thành plain object chuẩn hóa
+ */
+function normalizeWorkStruct(work) {
+  return parseWorkMetadata({
+    fileHash: work.fileHash,
+    owner: work.owner,
+    title: work.title,
+    description: work.description,
+    ipfsCid: work.ipfsCid || "",
+    pHash: work.pHash || "",
+    timestamp: Number(work.timestamp),
+  });
+}
 
 /**
  * Khởi tạo Provider chỉ-đọc thông qua RPC URL
@@ -67,26 +91,15 @@ export async function checkIsRegistered(fileHash) {
 }
 
 /**
- * Lấy thông tin chi tiết một tác phẩm theo mã hash (tự động phân giải IPFS và pHash)
+ * Lấy thông tin chi tiết một tác phẩm theo mã hash
  * @param {string} fileHash Mã hash bytes32
- * @returns {Promise<{ fileHash: string, owner: string, title: string, description: string, cleanDescription: string, ipfsHash: string, pHash: string, timestamp: number } | null>}
+ * @returns {Promise<Object | null>}
  */
 export async function fetchWork(fileHash) {
   try {
     const contract = getReadOnlyContract();
     const work = await contract.getWork(fileHash);
-    const parsed = parseWorkMetadata({
-      fileHash: work.fileHash,
-      owner: work.owner,
-      title: work.title,
-      description: work.description,
-      timestamp: Number(work.timestamp),
-    });
-
-    // Lưu vào bộ nhớ tạm known works để hỗ trợ tính năng chống đạo nhái pHash
-    saveKnownWorkToCache(parsed);
-
-    return parsed;
+    return normalizeWorkStruct(work);
   } catch (error) {
     console.warn("Không tìm thấy tác phẩm hoặc lỗi khi gọi getWork:", error);
     return null;
@@ -96,7 +109,7 @@ export async function fetchWork(fileHash) {
 /**
  * Lấy danh sách các tác phẩm thuộc sở hữu của một địa chỉ ví
  * @param {string} ownerAddress
- * @returns {Promise<Array<{ fileHash: string, owner: string, title: string, description: string, cleanDescription: string, ipfsHash: string, pHash: string, timestamp: number }>>}
+ * @returns {Promise<Array<Object>>}
  */
 export async function fetchWorksByOwner(ownerAddress) {
   try {
@@ -105,19 +118,10 @@ export async function fetchWorksByOwner(ownerAddress) {
 
     if (!hashes || hashes.length === 0) return [];
 
-    // Gọi đồng thời thông tin chi tiết của từng hash
     const worksPromises = hashes.map(async (hash) => {
       try {
         const item = await contract.getWork(hash);
-        const parsed = parseWorkMetadata({
-          fileHash: item.fileHash,
-          owner: item.owner,
-          title: item.title,
-          description: item.description,
-          timestamp: Number(item.timestamp),
-        });
-        saveKnownWorkToCache(parsed);
-        return parsed;
+        return normalizeWorkStruct(item);
       } catch (e) {
         console.error("Lỗi khi lấy chi tiết tác phẩm:", hash, e);
         return null;
@@ -125,7 +129,6 @@ export async function fetchWorksByOwner(ownerAddress) {
     });
 
     const results = await Promise.all(worksPromises);
-    // Sắp xếp tác phẩm mới nhất lên đầu
     return results
       .filter((w) => w !== null)
       .sort((a, b) => b.timestamp - a.timestamp);
@@ -136,63 +139,76 @@ export async function fetchWorksByOwner(ownerAddress) {
 }
 
 /**
- * Lưu tác phẩm đã biết vào LocalStorage Cache để phục vụ tra cứu pHash nhanh chóng
+ * Lấy toàn bộ danh sách tác phẩm trực tiếp từ state Smart Contract (KHÔNG dùng eth_getLogs)
+ * Dùng phân trang getWorksPaginated để tránh timeout RPC khi dữ liệu lớn.
+ * @returns {Promise<Array<Object>>}
  */
-function saveKnownWorkToCache(work) {
-  if (!work || !work.fileHash) return;
+export async function fetchAllWorksOnChain() {
   try {
-    const cacheKey = "copyright_known_works";
-    const existing = JSON.parse(localStorage.getItem(cacheKey) || "{}");
-    existing[work.fileHash] = {
-      fileHash: work.fileHash,
-      title: work.title,
-      owner: work.owner,
-      pHash: work.pHash,
-      ipfsHash: work.ipfsHash,
-      timestamp: work.timestamp,
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(existing));
-  } catch (e) {
-    console.warn("Lỗi lưu cache known work:", e);
+    const contract = getReadOnlyContract();
+    const total = Number(await contract.totalWorks());
+    if (total === 0) return [];
+
+    const pageSize = 50;
+    const allWorks = [];
+    for (let offset = 0; offset < total; offset += pageSize) {
+      const page = await contract.getWorksPaginated(offset, pageSize);
+      for (const item of page) {
+        allWorks.push(normalizeWorkStruct(item));
+      }
+    }
+    return allWorks;
+  } catch (error) {
+    console.warn("Không thể tải danh sách tác phẩm bằng getWorksPaginated:", error);
+    return [];
   }
 }
 
 /**
- * Lấy danh sách toàn bộ các tác phẩm đã biết trên hệ thống (để kiểm tra đạo nhái thị giác pHash)
- * @returns {Promise<Array<Object>>}
+ * Quét tìm tác phẩm hình ảnh tương đồng trực tiếp trên Smart Contract (1 RPC view call duy nhất, miễn phí gas).
+ * Không phụ thuộc localStorage hay eth_getLogs (không bao giờ bị lỗi pruned history!).
+ *
+ * @param {string} targetPHash Mã dHash 64-bit dạng bytes8 (0x...)
+ * @param {number} [maxDistance=14] Khoảng cách Hamming tối đa tìm kiếm (9 => >=85.9%, 14 => >=78.1%)
+ * @param {string | null} [excludeFileHash] Bỏ qua nếu trùng chính fileHash đang kiểm tra
+ * @returns {Promise<Object>} Kết quả đánh giá từ evaluatePlagiarismFromDistance()
  */
-export async function fetchAllKnownWorks() {
-  const cacheKey = "copyright_known_works";
-  let cachedList = [];
-
-  try {
-    const stored = JSON.parse(localStorage.getItem(cacheKey) || "{}");
-    cachedList = Object.values(stored);
-  } catch {
-    cachedList = [];
+export async function findSimilarWorkOnChain(
+  targetPHash,
+  maxDistance = MEDIUM_SIMILAR_HAMMING_DISTANCE,
+  excludeFileHash = null
+) {
+  if (!isNonZeroPHash(targetPHash)) {
+    return evaluatePlagiarismFromDistance(64, null);
   }
+
+  const normalizedPHash = normalizePHashBytes8(targetPHash);
 
   try {
     const contract = getReadOnlyContract();
-    // Lấy event WorkRegistered từ block gần nhất
-    const filter = contract.filters.WorkRegistered();
-    // Giới hạn trong khoảng 50,000 blocks gần đây để tránh timeout RPC
-    const events = await contract.queryFilter(filter, -50000).catch(() => []);
+    const [found, matchedFileHash, minDistance] = await contract.findSimilarWork(
+      normalizedPHash,
+      maxDistance
+    );
 
-    for (const evt of events) {
-      const hash = evt.args?.fileHash || evt.args?.[0];
-      if (hash && !cachedList.some((w) => w.fileHash === hash)) {
-        try {
-          const detail = await fetchWork(hash);
-          if (detail) {
-            cachedList.push(detail);
-          }
-        } catch {}
-      }
+    if (!found || !matchedFileHash || matchedFileHash === ethers.ZeroHash) {
+      return evaluatePlagiarismFromDistance(64, null);
     }
-  } catch (err) {
-    console.warn("Không thể query logs WorkRegistered từ RPC, sử dụng cached list:", err);
-  }
 
-  return cachedList;
+    // Nếu tác phẩm khớp nhất chính là fileHash đang loại trừ, đối chiếu qua danh sách đầy đủ
+    if (excludeFileHash && matchedFileHash.toLowerCase() === excludeFileHash.toLowerCase()) {
+      const allWorks = await fetchAllWorksOnChain();
+      return checkVisualPlagiarism(normalizedPHash, allWorks, excludeFileHash);
+    }
+
+    const matchedWork = await fetchWork(matchedFileHash);
+    return evaluatePlagiarismFromDistance(Number(minDistance), matchedWork);
+  } catch (error) {
+    console.warn("Lỗi khi gọi findSimilarWork on-chain, thử đọc danh sách tác phẩm dự phòng:", error);
+    const allWorks = await fetchAllWorksOnChain();
+    return checkVisualPlagiarism(normalizedPHash, allWorks, excludeFileHash);
+  }
 }
+
+// Giữ alias tương thích ngược
+export const fetchAllKnownWorks = fetchAllWorksOnChain;

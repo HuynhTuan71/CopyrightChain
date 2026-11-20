@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -16,20 +16,17 @@ import {
   ShieldCheck,
   Database,
   Fingerprint,
-  Image as ImageIcon,
-  AlertTriangle,
-  ArrowRight,
   Eye,
+  Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { calculateFileHash, isValidBytes32Hash } from "../utils/hash";
 import {
   fetchWork,
   checkIsRegistered,
-  fetchAllKnownWorks,
+  findSimilarWorkOnChain,
 } from "../utils/contract";
 import {
-  formatAddress,
   formatTimestamp,
   formatFileSize,
   copyToClipboard,
@@ -37,16 +34,15 @@ import {
 } from "../utils/format";
 import { generateCertificatePDF } from "../utils/pdf";
 import IPFSPreviewModal from "../components/IPFSPreviewModal";
-import { getIPFSGatewayUrl, getLocalPreview } from "../utils/ipfs";
+import { getLocalPreview } from "../utils/ipfs";
 import {
   isImageFile,
   calculateDHash,
-  checkVisualPlagiarism,
+  MEDIUM_SIMILAR_HAMMING_DISTANCE,
 } from "../utils/phash";
 
 export default function Verify() {
   const { hash: urlHash } = useParams();
-  const navigate = useNavigate();
 
   const [inputHash, setInputHash] = useState(urlHash || "");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -61,7 +57,7 @@ export default function Verify() {
   const [verifiedWork, setVerifiedWork] = useState(null);
   const [searchedHash, setSearchedHash] = useState("");
 
-  // NÂNG CẤP 4: Phát hiện đạo nhái / sửa đổi hình ảnh (1 pixel / chỉnh màu) bằng pHash
+  // NÂNG CẤP 4: Phát hiện đạo nhái / sửa đổi hình ảnh (1 pixel / chỉnh màu / nén) bằng dHash On-Chain
   const [analyzedPHash, setAnalyzedPHash] = useState(null);
   const [similarWorkFound, setSimilarWorkFound] = useState(null);
   const [isAnalyzingPHash, setIsAnalyzingPHash] = useState(false);
@@ -90,6 +86,8 @@ export default function Verify() {
       return;
     }
 
+    setSelectedFile(null);
+    setAnalyzedPHash(null);
     setIsSearching(true);
     setVerifyStatus(null);
     setVerifiedWork(null);
@@ -141,12 +139,9 @@ export default function Verify() {
     setSimilarWorkFound(null);
     setAnalyzedPHash(null);
 
-    let calculatedHash = "";
-
     try {
       // 1. Tính toán mã băm SHA-256
       const { hash } = await calculateFileHash(file);
-      calculatedHash = hash;
       setInputHash(hash);
       setSearchedHash(hash);
 
@@ -162,23 +157,24 @@ export default function Verify() {
         }
       }
 
-      // 3. Nếu SHA-256 KHÔNG khớp, nhưng là file ảnh -> KÍCH HOẠT NÂNG CẤP 4 (pHash Visual Analysis)
-      setVerifyStatus("NOT_FOUND");
-
+      // 3. Nếu SHA-256 KHÔNG khớp, nhưng là file ảnh -> KÍCH HOẠT QUÉT dHash TRỰC TIẾP ON-CHAIN
       if (isImageFile(file)) {
         setIsAnalyzingPHash(true);
         try {
           const phashResult = await calculateDHash(file);
           setAnalyzedPHash(phashResult.dHash);
 
-          // Quét đối chiếu với các tác phẩm đã biết trên hệ thống
-          const knownWorks = await fetchAllKnownWorks();
-          const plagResult = checkVisualPlagiarism(phashResult.dHash, knownWorks, hash);
+          // Gọi trực tiếp hàm view findSimilarWork() trên Smart Contract (0 gas, không lỗi RPC logs)
+          const plagResult = await findSimilarWorkOnChain(
+            phashResult.dHash,
+            MEDIUM_SIMILAR_HAMMING_DISTANCE,
+            hash
+          );
 
-          if (plagResult.hasPlagiarismRisk && plagResult.matchedWork) {
+          if ((plagResult.hasPlagiarismRisk || plagResult.hasModerateSimilarity) && plagResult.matchedWork) {
             setSimilarWorkFound(plagResult);
             toast(
-              `PHÁT HIỆN TƯƠNG ĐỒNG: Bức ảnh giống ${plagResult.highestSimilarity}% với tác phẩm đã đăng ký!`,
+              `PHÁT HIỆN TƯƠNG ĐỒNG: Bức ảnh giống ${plagResult.highestSimilarity}% với tác phẩm "${plagResult.matchedWork.title}"!`,
               {
                 icon: "🔍",
                 duration: 6000,
@@ -192,6 +188,8 @@ export default function Verify() {
           setIsAnalyzingPHash(false);
         }
       }
+
+      setVerifyStatus("NOT_FOUND");
     } catch (err) {
       console.error("Lỗi khi băm file:", err);
       toast.error("Không thể tính mã SHA-256 của file: " + err.message);
@@ -252,13 +250,12 @@ export default function Verify() {
           Xác Minh Quyền Sở Hữu Tác Phẩm
         </h1>
         <p className="text-xs sm:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-          Tra cứu tính nguyên bản (SHA-256), phát hiện chỉnh sửa thị giác (pHash) và truy xuất nguồn gốc vĩnh viễn trên Ethereum Sepolia & IPFS.
+          Tra cứu tính nguyên bản (SHA-256), phát hiện ảnh chỉnh sửa/đạo nhái bằng Perceptual Hash (pHash 64-bit) trực tiếp trên Smart Contract mà không cần ví.
         </p>
       </div>
 
       {/* KHU VỰC NHẬP LIỆU: KÉO THẢ HOẶC DÁN HASH */}
       <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 space-y-5 sm:space-y-6">
-        {/* Vùng kéo thả file để tự băm và tra cứu */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -293,7 +290,7 @@ export default function Verify() {
                 {isHashing
                   ? "Đang tính toán mã băm SHA-256 trên trình duyệt..."
                   : isAnalyzingPHash
-                  ? "Đang phân tích dấu vân tay thị giác pHash để tìm kiếm bản sao..."
+                  ? "Đang đối chiếu dấu vân tay thị giác pHash trên Blockchain..."
                   : "Kéo thả file vào đây hoặc bấm để chọn"}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -338,7 +335,7 @@ export default function Verify() {
           </div>
           <button
             type="submit"
-            disabled={isSearching || isHashing}
+            disabled={isSearching || isHashing || isAnalyzingPHash}
             className="px-6 py-3.5 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-95 shadow-sm"
           >
             {isSearching ? (
@@ -383,7 +380,6 @@ export default function Verify() {
                 </div>
               </div>
 
-              {/* Nút tải Giấy chứng nhận PDF */}
               <button
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
@@ -445,7 +441,6 @@ export default function Verify() {
                 </div>
               </div>
 
-              {/* NÂNG CẤP 1: THÔNG TIN IPFS GATEWAY */}
               {verifiedWork.ipfsHash && (
                 <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 space-y-2 md:col-span-2">
                   <div className="flex items-center justify-between">
@@ -467,12 +462,11 @@ export default function Verify() {
                 </div>
               )}
 
-              {/* NÂNG CẤP 4: THÔNG TIN pHash */}
               {verifiedWork.pHash && (
                 <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/40 space-y-1 md:col-span-2">
                   <span className="text-xs font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-1.5">
                     <Fingerprint className="w-4 h-4 text-purple-600" />
-                    Dấu vân tay thị giác (Perceptual Hash pHash):
+                    Dấu vân tay thị giác (pHash 64-bit On-Chain):
                   </span>
                   <p className="font-mono text-xs text-purple-800 dark:text-purple-300 break-all font-semibold">
                     {verifiedWork.pHash}
@@ -507,7 +501,7 @@ export default function Verify() {
           </motion.div>
         )}
 
-        {/* TRƯỜNG HỢP 2: SHA-256 KHÔNG KHỚP NHƯNG pHash PHÁT HIỆN TƯƠNG ĐỒNG CAO (NÂNG CẤP 4 - PHÁT HIỆN ĐẠO NHÁI / CHỈNH SỬA 1 PIXEL) */}
+        {/* TRƯỜNG HỢP 2: SHA-256 KHÔNG KHỚP NHƯNG dHash ON-CHAIN PHÁT HIỆN TƯƠNG ĐỒNG (THẺ VÀNG) */}
         {verifyStatus === "NOT_FOUND" && similarWorkFound && (
           <motion.div
             key="similar_found"
@@ -520,26 +514,57 @@ export default function Verify() {
               <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                 <ShieldAlert className="w-7 h-7" />
               </div>
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/40 text-amber-800 dark:text-amber-200 text-xs font-bold uppercase tracking-wider">
-                  Cảnh báo tương đồng thị giác: {similarWorkFound.highestSimilarity}%
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/50 text-amber-900 dark:text-amber-200 text-xs font-bold uppercase tracking-wider">
+                    Tương đồng thị giác: {similarWorkFound.highestSimilarity}%
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/80 dark:bg-black/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-mono font-semibold">
+                    Khoảng cách Hamming: {similarWorkFound.hammingDistance}/64 bit
+                  </span>
                 </div>
+
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Phát hiện nghi vấn chỉnh sửa hoặc đạo nhái tác phẩm!
+                  {similarWorkFound.hasPlagiarismRisk
+                    ? "Phát hiện ảnh đã bị chỉnh sửa hoặc đạo nhái từ tác phẩm gốc!"
+                    : "Phát hiện ảnh có nét tương đồng với tác phẩm đã đăng ký"}
                 </h3>
                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                  Mã SHA-256 không khớp vì file đã bị sửa đổi (thay đổi 1 pixel, chỉnh màu hoặc đổi metadata). 
-                  Tuy nhiên, thuật toán <strong>Perceptual Hash (pHash)</strong> phát hiện cấu trúc hình ảnh này giống đến{" "}
-                  <strong>{similarWorkFound.highestSimilarity}%</strong> với tác phẩm gốc đã đăng ký trước đó.
+                  Mã <strong>SHA-256 không khớp</strong> vì file đã bị thay đổi (sửa 1 hoặc nhiều pixel, nén lại, chỉnh màu hoặc đổi metadata).
+                  Tuy nhiên, thuật toán <strong>pHash 64-bit On-Chain</strong> phát hiện cấu trúc hình ảnh giống đến{" "}
+                  <strong>{similarWorkFound.highestSimilarity}%</strong> với tác phẩm gốc đã đăng ký bản quyền trước đó.
                 </p>
+              </div>
+            </div>
+
+            {/* So sánh trực quan pHash */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-amber-200 dark:border-amber-800/40">
+                <span className="text-slate-500 dark:text-slate-400 block mb-1">pHash ảnh vừa tải lên:</span>
+                <span className="font-mono font-semibold text-amber-700 dark:text-amber-300 break-all">
+                  {analyzedPHash || "—"}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-black/40 border border-purple-200 dark:border-purple-800/40">
+                <span className="text-slate-500 dark:text-slate-400 block mb-1">pHash tác phẩm gốc trên Blockchain:</span>
+                <span className="font-mono font-semibold text-purple-700 dark:text-purple-300 break-all">
+                  {similarWorkFound.matchedWork.pHash}
+                </span>
               </div>
             </div>
 
             {/* Thông tin tác phẩm gốc bị chỉnh sửa */}
             <div className="p-4 rounded-2xl bg-white dark:bg-black/40 border border-amber-300 dark:border-amber-700/50 space-y-3 text-xs">
-              <div className="font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                Tác phẩm gốc trên hệ thống:
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                  Tác phẩm gốc trên hệ thống:
+                </span>
+                <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                  <Clock className="w-3.5 h-3.5" />
+                  Đăng ký lúc: {formatTimestamp(similarWorkFound.matchedWork.timestamp)}
+                </span>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700 dark:text-slate-300">
                 <div>
                   <span className="text-slate-500">Tiêu đề gốc:</span>
@@ -560,7 +585,7 @@ export default function Verify() {
                   to={`/verify/${similarWorkFound.matchedWork.fileHash}`}
                   className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold flex items-center gap-1.5 transition text-xs shadow-sm"
                 >
-                  <Eye className="w-3.5 h-3.5" /> Xem tác phẩm gốc trên Blockchain
+                  <Eye className="w-3.5 h-3.5" /> Xem chi tiết tác phẩm gốc trên Blockchain
                 </Link>
               </div>
             </div>
@@ -585,7 +610,7 @@ export default function Verify() {
                   Chưa có bản ghi trên Blockchain
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Mã băm này chưa từng được đăng ký trong Smart Contract của CopyrightChain trên Ethereum Sepolia.
+                  Mã băm SHA-256 này chưa từng được đăng ký và cũng không phát hiện hình ảnh tương đồng trong Smart Contract của CopyrightChain.
                 </p>
               </div>
             </div>
@@ -596,20 +621,30 @@ export default function Verify() {
                 Lưu ý quan trọng về tính toàn vẹn file:
               </p>
               <p>
-                Nếu file đã từng được đăng ký trước đó nhưng bị chỉnh sửa (dù chỉ thay đổi 1 dấu chấm, 1 pixel hoặc 1 byte metadata), mã SHA-256 sẽ hoàn toàn khác biệt và hệ thống sẽ không nhận diện được.
+                Với file văn bản/âm thanh/video, chỉ cần thay đổi 1 byte thì mã SHA-256 sẽ khác hoàn toàn. Với file hình ảnh, hệ thống còn đối chiếu thêm dấu vân tay thị giác pHash 64-bit để truy tìm ảnh gốc nếu bị sửa pixel, nén ảnh hoặc chỉnh màu.
               </p>
-              <div className="pt-1 font-mono text-[11px] text-slate-500 dark:text-slate-400 break-all">
-                Hash vừa kiểm tra:{" "}
-                <span className="text-slate-800 dark:text-slate-200 font-medium">
-                  {searchedHash}
-                </span>
+              <div className="pt-1 font-mono text-[11px] text-slate-500 dark:text-slate-400 break-all space-y-1">
+                <div>
+                  SHA-256 vừa kiểm tra:{" "}
+                  <span className="text-slate-800 dark:text-slate-200 font-medium">
+                    {searchedHash}
+                  </span>
+                </div>
+                {analyzedPHash && (
+                  <div>
+                    pHash 64-bit:{" "}
+                    <span className="text-purple-600 dark:text-purple-400 font-medium">
+                      {analyzedPHash}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* KHỐI GIẢI THÍCH TRỰC QUAN: NGUYÊN LÝ SHA-256 & pHash */}
+      {/* KHỐI GIẢI THÍCH TRỰC QUAN: NGUYÊN LÝ SHA-256 & dHash */}
       <div className="glass-card rounded-2xl p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-blue-50 dark:bg-[#0066CC]/15 text-[#0066CC] dark:text-[#38BDF8]">
@@ -617,10 +652,10 @@ export default function Verify() {
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-              Cơ chế bảo vệ 2 lớp: SHA-256 & Perceptual Hash (pHash)
+              Cơ chế bảo vệ 2 lớp On-Chain: SHA-256 & Perceptual Hash (pHash 64-bit)
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Giải pháp toàn diện ngăn chặn gian lận số trên nền tảng Blockchain
+              Giải pháp toàn diện ngăn chặn gian lận số trực tiếp trên Smart Contract
             </p>
           </div>
         </div>
@@ -637,15 +672,15 @@ export default function Verify() {
 
           <div className="p-4 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30 space-y-2">
             <div className="font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-              <Fingerprint className="w-4 h-4" /> 2. pHash: Chống đạo nhái thị giác
+              <Fingerprint className="w-4 h-4" /> 2. pHash 64-bit: Chống đạo nhái thị giác On-Chain
             </div>
             <p>
-              Phân tích cấu trúc hình học và độ sáng thị giác. Nếu kẻ xấu lấy cắp tác phẩm, nén lại hoặc sửa 1 pixel để lách SHA-256, pHash vẫn phát hiện độ tương đồng &gt;90%!
+              Phân tích cấu trúc độ sáng (8×6) kết hợp đặc trưng màu sắc vùng YCbCr. Nếu kẻ xấu sửa 1 pixel, nén ảnh, chèn chữ hoặc chỉnh sáng để lách SHA-256, Smart Contract vẫn phát hiện khoảng cách Hamming ≤ 9/64 bit (≥ 85.9%) để cảnh báo và chặn đăng ký!
             </p>
           </div>
         </div>
       </div>
-    
+
       <IPFSPreviewModal
         isOpen={showIpfsModal}
         onClose={() => setShowIpfsModal(false)}
@@ -653,6 +688,6 @@ export default function Verify() {
         title={verifiedWork?.title}
         previewUrl={verifiedWork ? getLocalPreview(verifiedWork.ipfsHash) : null}
       />
-</div>
+    </div>
   );
 }

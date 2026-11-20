@@ -56,9 +56,9 @@ export default function Home() {
             </h1>
 
             <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
-              Tạo chứng nhận sở hữu tác phẩm số không thể chối cãi. File gốc của bạn
-              <strong> không bao giờ rời khỏi trình duyệt</strong>; chỉ mã băm SHA-256
-              và bằng chứng thời gian được ghi vĩnh viễn trên mạng Ethereum Sepolia.
+              Tạo chứng nhận sở hữu tác phẩm số không thể chối cãi. Mã băm SHA-256 và dấu vân tay thị giác
+              <strong> pHash 64-bit</strong> được tính ngay trên trình duyệt, lưu trữ phi tập trung qua IPFS (Pinata)
+              và ghi nhận vĩnh viễn trên mạng Ethereum Sepolia.
             </p>
 
             {/* Các nút bấm hành động chính */}
@@ -85,11 +85,7 @@ export default function Home() {
             <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-1.5">
                 <Lock className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <span>Bảo mật 100% Client-side</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Database className="w-4 h-4 text-[#0066CC] dark:text-[#38BDF8] flex-shrink-0" />
-                <span>Không lưu file trên Server</span>
+                <span>Bảo mật mã băm Client-side</span>
               </div>
             </div>
           </motion.div>
@@ -196,7 +192,7 @@ export default function Home() {
               <p className="text-2xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
                 100%
               </p>
-              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Phi tập trung, không Server</p>
+              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Phi tập trung (Sepolia + IPFS)</p>
             </div>
           </div>
         </div>
@@ -226,7 +222,7 @@ export default function Home() {
               </div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Chọn file tác phẩm</h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Bạn kéo thả hình ảnh, bài hát, video hoặc tài liệu vào trình duyệt. File hoàn toàn được giữ lại trên máy bạn.
+                Bạn kéo thả hình ảnh, bài hát, video hoặc tài liệu vào trình duyệt và tuỳ chọn lưu trữ phi tập trung trên mạng IPFS (Pinata).
               </p>
             </div>
           </div>
@@ -284,9 +280,9 @@ export default function Home() {
               <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">File không bao giờ rời máy bạn</h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Lưu trữ IPFS & Chống đạo nhái pHash</h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Khác với các dịch vụ lưu trữ đám mây truyền thống, CopyrightChain không bao giờ tải file của bạn lên mạng. Bạn giữ 100% quyền riêng tư và tài sản trí tuệ.
+                Tác phẩm được lưu trữ phi tập trung trên IPFS (Pinata) qua mã CID vĩnh viễn, kết hợp thuật toán pHash 64-bit on-chain phát hiện và chặn ảnh đã chỉnh sửa.
               </p>
             </div>
           </div>

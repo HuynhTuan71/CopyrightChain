@@ -1,77 +1,90 @@
 /**
- * Tiện ích mã hóa & giải mã Metadata (IPFS Hash + pHash Visual Fingerprint)
- * Đóng gói an toàn vào trường description của Smart Contract (tối đa 500 bytes)
- * Giúp tương thích 100% với Smart Contract đã deploy sẵn trên Sepolia mà không cần migrate!
+ * Tiện ích chuẩn hóa Metadata (IPFS CID + pHash) và đo độ dài UTF-8 bytes
+ * Hỗ trợ:
+ * 1. Đọc trực tiếp trường ipfsCid và pHash từ Smart Contract bản nâng cấp
+ * 2. Tương thích ngược với các bản ghi cũ có nhúng thẻ [meta:ipfs=...|phash=...] trong description
  */
+
+import { isNonZeroPHash, normalizePHashBytes8 } from "./phash";
 
 const META_PREFIX = "[meta:";
 const META_SUFFIX = "]";
 
 /**
- * Đóng gói mô tả của người dùng kèm mã IPFS và pHash
- * @param {string} userDescription Mô tả do người dùng nhập
- * @param {{ ipfsHash?: string, pHash?: string }} metadata
- * @returns {string} Chuỗi description đã đóng gói (đảm bảo <= 500 bytes)
+ * Đếm chính xác số byte UTF-8 của một chuỗi (khớp 100% với bytes(str).length trong Solidity)
+ * @param {string} str
+ * @returns {number}
+ */
+export function getUtf8ByteLength(str = "") {
+  return new TextEncoder().encode(str || "").length;
+}
+
+/**
+ * Cắt chuỗi sao cho độ dài UTF-8 không vượt quá maxBytes
+ * @param {string} str
+ * @param {number} maxBytes
+ * @returns {string}
+ */
+export function truncateToUtf8Bytes(str = "", maxBytes = 100) {
+  let result = str || "";
+  while (getUtf8ByteLength(result) > maxBytes && result.length > 0) {
+    result = result.slice(0, -1);
+  }
+  return result;
+}
+
+/**
+ * Đóng gói mô tả kèm Metadata (giữ lại cho tương thích ngược nếu cần)
  */
 export function encodeDescriptionWithMetadata(userDescription = "", { ipfsHash = "", pHash = "" } = {}) {
   const cleanDesc = (userDescription || "").trim();
 
-  // Nếu không có cả IPFS và pHash thì trả về mô tả gốc
   if (!ipfsHash && !pHash) {
-    return cleanDesc.slice(0, 500);
+    return truncateToUtf8Bytes(cleanDesc, 500);
   }
 
-  // Đóng gói dạng tag gọn nhẹ: [meta:ipfs=Qm...|phash=0x...]
   const parts = [];
   if (ipfsHash) parts.push(`ipfs=${ipfsHash.trim()}`);
-  if (pHash) parts.push(`phash=${pHash.trim()}`);
+  if (pHash && isNonZeroPHash(pHash)) parts.push(`phash=${normalizePHashBytes8(pHash)}`);
+
+  if (parts.length === 0) {
+    return truncateToUtf8Bytes(cleanDesc, 500);
+  }
 
   const metaTag = `${META_PREFIX}${parts.join("|")}${META_SUFFIX}`;
-
-  // Giới hạn tổng độ dài không vượt quá 500 byte (theo require của Smart Contract)
-  // Tính độ dài byte UTF-8
-  const metaTagBytes = new TextEncoder().encode(metaTag).length;
+  const metaTagBytes = getUtf8ByteLength(metaTag);
   const maxDescBytes = 490 - metaTagBytes;
-
-  let truncatedDesc = cleanDesc;
-  while (new TextEncoder().encode(truncatedDesc).length > maxDescBytes && truncatedDesc.length > 0) {
-    truncatedDesc = truncatedDesc.slice(0, -1);
-  }
+  const truncatedDesc = truncateToUtf8Bytes(cleanDesc, Math.max(0, maxDescBytes));
 
   return truncatedDesc ? `${truncatedDesc}\n${metaTag}` : metaTag;
 }
 
 /**
- * Giải mã trường description để bóc tách mô tả gốc, IPFS CID và pHash
- * @param {Object} work Đối tượng tác phẩm từ Smart Contract { description, ... }
- * @returns {Object} Đối tượng tác phẩm đã bổ sung { cleanDescription, ipfsHash, pHash }
+ * Chuẩn hóa đối tượng Work từ Smart Contract thành định dạng thống nhất cho Frontend
+ * @param {Object} work
+ * @returns {Object}
  */
 export function parseWorkMetadata(work) {
   if (!work) return work;
 
   const rawDescription = work.description || "";
   let cleanDescription = rawDescription;
-  let ipfsHash = work.ipfsHash || "";
-  let pHash = work.pHash || "";
+  let ipfsHash = (work.ipfsCid || work.ipfsHash || "").trim();
+  let pHash = isNonZeroPHash(work.pHash) ? normalizePHashBytes8(work.pHash) : "";
 
-  // Tìm kiếm thẻ [meta:...]
+  // Tương thích ngược: bóc tách thẻ [meta:...] nếu có trong dữ liệu cũ
   const metaRegex = /\[meta:(.*?)\]/s;
   const match = rawDescription.match(metaRegex);
 
   if (match) {
-    // Tách phần mô tả sạch
     cleanDescription = rawDescription.replace(metaRegex, "").trim();
-
-    // Bóc tách các cặp key=value
-    const metaContent = match[1];
-    const pairs = metaContent.split("|");
-
+    const pairs = match[1].split("|");
     for (const pair of pairs) {
       const [key, value] = pair.split("=");
-      if (key === "ipfs" && value) {
+      if (key === "ipfs" && value && !ipfsHash) {
         ipfsHash = value.trim();
-      } else if (key === "phash" && value) {
-        pHash = value.trim();
+      } else if (key === "phash" && value && !pHash && isNonZeroPHash(value)) {
+        pHash = normalizePHashBytes8(value);
       }
     }
   }
@@ -79,6 +92,7 @@ export function parseWorkMetadata(work) {
   return {
     ...work,
     cleanDescription,
+    ipfsCid: ipfsHash,
     ipfsHash,
     pHash,
   };
