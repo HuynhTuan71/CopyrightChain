@@ -250,7 +250,7 @@ npm run preview
 | :-: | :--- | :--- | :--- |
 | 1 | **Smart Contract & Unit Tests** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Xây dựng hợp đồng `CopyrightRegistry.sol`, thuật toán swap-and-pop, 19 bài test tự động và script deploy |
 | 2 | **Bảo mật SHA-256 Client-side** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Tích hợp Web Crypto API băm file trên RAM máy khách, bảo mật file gốc tuyệt đối |
-| 3 | **Giao diện Frontend & UI/UX** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Xây dựng toàn bộ giao diện React + Vite + Tailwind, bộ màu CTUET, Dark/Light Mode, Navbar, Footer, Trang chủ |
+| 3 | **Giao diện Frontend & UI/UX** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Xây dựng toàn bộ giao diện React + Vite + Tailwind, bộ màu, Dark/Light Mode, Navbar, Footer, Trang chủ |
 | 4 | **Responsive Mobile & Typography** | [Huỳnh Tuấn](https://github.com/HuynhTuan71) | Tối ưu hiển thị điện thoại, Sidebar Drawer bằng React `createPortal`, căn chỉnh khoảng cách chữ tiếng Việt |
 | 5 | **Lưu trữ phi tập trung IPFS** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Tích hợp Pinata API, upload & ghim file, tính mã băm CIDv0, modal xem trước trên IPFS Gateway |
 | 6 | **Chống đạo nhái thị giác (pHash)** | [Nguyễn Đắc Nhẫn](https://github.com/DacNhan05) | Phát triển thuật toán Perceptual Hash 64-bit, tính khoảng cách Hamming, phát hiện sửa 1 pixel ảnh |
